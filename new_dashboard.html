@@ -132,14 +132,7 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
 </head>
 
 <body>
-    <!-- LOGOUT BUTTON TOP RIGHT -->
-<div style="position:fixed; top:10px; right:10px; z-index:10000;">
-    <button onclick="logout()" 
-        style="padding:8px 12px; background:#c0392b; color:white; border:none; border-radius:6px; font-weight:bold; cursor:pointer;">
-        Logout
-    </button>
-</div>
-
+  
     <div id="topLoader" style="
     position:fixed;
     top:0;
@@ -242,7 +235,11 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
       <button id="submitBtn" class="btn">Submit</button>
       <button id="updateAmountBtn" class="btn" style="background:#6c757d;">Update</button>
     </div>
-    <button class="btn" style="background:#dc3545; margin-top:10px;" onclick="refreshPage()">Refresh</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+    <button class="btn" style="background:#dc3545;" onclick="refreshPage()">Refresh</button>
+    <button class="btn" style="background:#8e44ad;" onclick="logout()">Logout</button>
+</div>
+
   </div>
 
   <!-- Groceries Form Card -->
@@ -336,7 +333,11 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
       <button id="submitGroceryBtn" class="btn">Submit</button>
       <button id="updateGroceryBtn" class="btn" style="background:#6c757d;">Update</button>
     </div>
-    <button class="btn" style="background:#dc3545; margin-top:10px;" onclick="refreshPage()">Refresh</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+    <button class="btn" style="background:#dc3545;" onclick="refreshPage()">Refresh</button>
+    <button class="btn" style="background:#8e44ad;" onclick="logout()">Logout</button>
+</div>
+
 
   </div>
 
@@ -410,7 +411,11 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
       <button id="submitVilakuBtn" class="btn">Submit</button>
       <button id="updateVilakuBtn" class="btn" style="background:#6c757d;">Update</button>
     </div>
-    <button class="btn" style="background:#dc3545; margin-top:10px;" onclick="refreshPage()">Refresh</button>
+    <div style="display:flex; gap:10px; margin-top:10px;">
+    <button class="btn" style="background:#dc3545;" onclick="refreshPage()">Refresh</button>
+    <button class="btn" style="background:#8e44ad;" onclick="logout()">Logout</button>
+</div>
+
 
   </div>
 
@@ -1360,5 +1365,3 @@ function refreshPage() {
 
 </body>
 </html>
-
-
