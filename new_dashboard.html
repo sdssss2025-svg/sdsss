@@ -589,7 +589,10 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbyVkeYA_zkJqUy7REIkCt
 
 // ---------- USER + PERMISSIONS FROM LOGIN ----------
 let currentUser = null;
-
+function logout() {
+    localStorage.removeItem("ayyappaUser");  // clear session
+    window.location.href = "index1.html";    // redirect to login page
+}
 function getUserFromStorage() {
   try {
     const raw = localStorage.getItem('ayyappaUser');
@@ -1349,3 +1352,4 @@ function refreshPage() {
 
 </body>
 </html>
+
