@@ -1,0 +1,21 @@
+{
+  "name": "Sree Dharma Sastha Seva Sangam",
+  "short_name": "Sastha Seva",
+  "start_url": "/sdsss/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "description": "Ayyappa Seva Sangam – Amount, Groceries, Vilakku Management",
+  "icons": [
+    {
+      "src": "/sdsss/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/sdsss/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
