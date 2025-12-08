@@ -603,8 +603,9 @@ const scriptURL = "https://script.google.com/macros/s/AKfycbyVkeYA_zkJqUy7REIkCt
 // ---------- USER + PERMISSIONS FROM LOGIN ----------
 let currentUser = null;
 function logout() {
+     showPopupLoader();
     localStorage.removeItem("ayyappaUser");  // clear session
-    window.location.href = "index.html";    // redirect to login page
+    window.location.href = "index1.html";    // redirect to login page
 }
 function getUserFromStorage() {
   try {
@@ -621,7 +622,7 @@ function getUserFromStorage() {
   if (!currentUser) {
     alert('Please login first');
     // change to your login file if needed (e.g. "index.html")
-    window.location.href = 'index.html';
+    window.location.href = 'index1.html';
   }
 })();
 
@@ -954,6 +955,7 @@ function selectSearchRecord(r){
 
 // --------- REPORT FUNCTIONS (same as before) ---------
 async function fetchReport(from, to){
+  showPopupLoader();
   if(!from||!to){ alert('Select dates'); return; }
   try{
     setLoading(filterBtn, statusMsg, true,'Fetching...');
@@ -1001,10 +1003,14 @@ async function fetchReport(from, to){
     if(filterType==='amount'){ statusMsg.innerHTML='<strong>Total Amount: '+rupee(totalAmount)+'</strong>'; }
     else { statusMsg.innerHTML='<strong>Total Pending: '+rupee(totalPending)+'</strong>'; }
   }catch(err){ alert('Error fetching report.\n'+err); }
-  finally{ setLoading(filterBtn, statusMsg, false); }
+  finally{
+     hidePopupLoader();
+     setLoading(filterBtn, statusMsg, false); }
 }
 
 async function fetchGroceryReport(from, to, pending){
+  showPopupLoader();
+
   if(!from||!to){ alert('Select dates'); return; }
   try{
     setLoading(gFilterBtn, gStatusMsg, true,'Fetching...');
@@ -1040,10 +1046,15 @@ async function fetchGroceryReport(from, to, pending){
       gStatusMsg.innerHTML='<strong>No records found</strong>';
     }
   }catch(err){ alert('Error fetching grocery report.\n'+err); }
-  finally{ setLoading(gFilterBtn, gStatusMsg, false); }
+  finally{ 
+    hidePopupLoader();
+
+    setLoading(gFilterBtn, gStatusMsg, false); }
 }
 
 async function fetchVilakuReport(from, to, pending){
+  showPopupLoader();
+
   if(!from||!to){ alert('Select dates'); return; }
   try{
     setLoading(vFilterBtn, vStatusMsg, true,'Fetching...');
@@ -1084,11 +1095,15 @@ async function fetchVilakuReport(from, to, pending){
       vStatusMsg.innerHTML='<strong>No records found</strong>';
     }
   }catch(err){ alert('Error fetching vilaku report.\n'+err); }
-  finally{ setLoading(vFilterBtn, vStatusMsg, false); }
+  finally{ 
+    hidePopupLoader();
+
+    setLoading(vFilterBtn, vStatusMsg, false); }
 }
 
 // --------- SUBMIT (INSERT / UPDATE) ---------
 submitBtn.addEventListener('click', async ()=>{
+  showPopupLoader();
   if (!currentUser || !currentUser.canSubmit) { alert('Not allowed to submit'); return; }
 
   const name=document.getElementById('name').value.trim();
@@ -1136,7 +1151,9 @@ submitBtn.addEventListener('click', async ()=>{
       if(from&&to) fetchReport(from,to);
     } else { alert('Error: '+(data.message||'Unknown')); }
   } catch(err){ alert('Network error.\n'+err); }
-  finally{ setLoading(submitBtn, statusMsg, false); }
+  finally{
+     hidePopupLoader();
+    setLoading(submitBtn, statusMsg, false); }
 });
 
 submitGroceryBtn.addEventListener('click', async ()=>{
@@ -1278,6 +1295,9 @@ vFilterBtn.addEventListener('click',()=>{
 
 // Download buttons (respect already-hidden if no permission)
 downloadBtn.addEventListener('click',()=>{
+  showPopupLoader();
+  setTimeout(hidePopupLoader, 800);
+
   const from=document.getElementById('fromDate').value;
   const to=document.getElementById('toDate').value;
   if(!from||!to){ alert('Select dates first'); return; }
@@ -1293,6 +1313,9 @@ downloadBtn.addEventListener('click',()=>{
 });
 
 gDownloadBtn.addEventListener('click',()=>{
+  showPopupLoader();
+  setTimeout(hidePopupLoader, 800);
+
   const from=document.getElementById('gFromDate').value;
   const to=document.getElementById('gToDate').value;
   if(!from||!to){ alert('Select dates first'); return; }
@@ -1304,6 +1327,9 @@ gDownloadBtn.addEventListener('click',()=>{
 });
 
 vDownloadBtn.addEventListener('click',()=>{
+  showPopupLoader();
+  setTimeout(hidePopupLoader, 800);
+
   const from=document.getElementById('vFromDate').value;
   const to=document.getElementById('vToDate').value;
   if(!from||!to){ alert('Select dates first'); return; }
@@ -1358,12 +1384,64 @@ function hideTopLoader() {
     }, 300);
 }
 function refreshPage() {
-    location.reload();
+    showPopupLoader();
+    setTimeout(() => location.reload(), 200);
 }
+
+function showPopupLoader() {
+    document.getElementById("popupLoader").style.display = "flex";
+}
+
+function hidePopupLoader() {
+    document.getElementById("popupLoader").style.display = "none";
+}
+
 </script>
 
+<!-- FULL SCREEN POPUP LOADER (CENTERED) -->
+<div id="popupLoader" style="
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999999;
+    backdrop-filter: blur(3px);
+">
+
+    <div style="
+        background: #ffffff;
+        padding: 25px 35px;
+        border-radius: 14px;
+        box-shadow: 0 5px 25px rgba(0,0,0,0.3);
+        font-size: 18px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+    ">
+        <div class="spinner" style="
+            width: 32px;
+            height: 32px;
+            border: 4px solid #ccc;
+            border-radius: 50%;
+            border-top-color: #0066cc;
+            animation: spinLoaderPopup 0.8s linear infinite;
+        "></div>
+        Loading...
+    </div>
+
+</div>
+
+<style>
+@keyframes spinLoaderPopup {
+  to { transform: rotate(360deg); }
+}
+</style>
 
 </body>
 </html>
-
-
