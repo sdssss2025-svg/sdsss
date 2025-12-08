@@ -1,0 +1,1351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<title>ஸ்ரீ தர்ம சாஸ்தா சேவா சங்கம்</title>
+<style>
+/* ---------- BODY & BACKGROUND ---------- */
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    background-image: url('lordayyappan.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow-x: hidden;
+}
+
+/* ---------- WRAP ---------- */
+.wrap {
+    width: 100%;
+    max-width: 720px;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+
+/* ---------- FROSTED CARDS ---------- */
+.card {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    margin-top: 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+/* ---------- HEADER ---------- */
+.header {
+    background: rgba(210, 180, 140, 0.8);
+    padding: 18px;
+    text-align: center;
+    color: #4b2e15;
+    font-weight: 700;
+    border-bottom: 3px solid #b88a57;
+    border-radius: 8px;
+}
+
+/* ---------- FORM ELEMENTS ---------- */
+label { font-weight:600; font-size:14px; display:block; margin-top:10px; margin-bottom:6px; }
+input, select { width:100%; padding:10px; border-radius:8px; border:1px solid #cfcfcf; font-size:16px; box-sizing:border-box; }
+input[readonly] { background-color: #f0f0f0; cursor: not-allowed; }
+.row { display:flex; gap:10px; margin-top:6px; }
+.col { flex:1; }
+.payment-box { display:flex; justify-content:space-around; align-items:center; gap:10px; padding:10px; border-radius:8px; margin-top:6px; background: rgba(243,229,216,0.6); border:2px solid #b88a57; }
+.payment-option { display:flex; align-items:center; gap:6px; font-size:15px; }
+.controls { display:flex; gap:10px; margin-top:12px; align-items:center; flex-wrap:wrap; }
+.btn { padding:12px 16px; border-radius:8px; border:none; background:#0066cc; color:#fff; font-weight:700; font-size:15px; cursor:pointer; }
+.btn:disabled { opacity:0.6; cursor:not-allowed; }
+.summary { display:flex; justify-content:space-between; gap:10px; margin-top:12px; }
+.summary .box { flex:1; padding:10px; border-radius:8px; background: rgba(255,246,234,0.6); border:1px solid #f0d9b4; text-align:center; }
+table { border-collapse:collapse; margin-top:12px; font-size:14px; background: rgba(255,255,255,0.6); width:100%; }
+th, td { padding:8px; border:1px solid #eee; text-align:left; vertical-align:top; }
+th { background: rgba(250,250,250,0.6); font-weight:700; }
+.center { text-align:center; }
+.loader { display:inline-block; width:18px; height:18px; border:3px solid #fff; border-radius:50%; border-top-color:#0066cc; animation:spin 1s linear infinite; vertical-align:middle; margin-left:8px; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ---------- SCROLLABLE TABLE FIX ---------- */
+#tableWrap, #groceryTableWrap, #vilakuTableWrap {
+  display: block !important;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#tableWrap table, #groceryTableWrap table, #vilakuTableWrap table {
+  width: max-content;
+  min-width: 100%;
+}
+
+.hidden { display: none !important; }
+
+/* ---------- SEARCH MODAL FOR UPDATE ---------- */
+#searchModal {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+#searchModal.hidden {
+    display: none !important;
+}
+.modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+}
+#searchModal .card {
+    position: relative;
+    max-width: 720px;
+    width: 92%;
+    max-height: 80vh;
+    overflow-y: auto;
+    z-index: 1;
+}
+#searchTableWrap {
+    margin-top:10px;
+    display:none;
+    overflow-x:auto;
+}
+#searchTableWrap table {
+    width:max-content;
+    min-width:100%;
+}
+
+@media (max-width:720px) {
+    .row { flex-direction:column; }
+    .controls { flex-direction:column; }
+    .summary { flex-direction:column; }
+}
+</style>
+</head>
+
+<body>
+    <div id="topLoader" style="
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:4px;
+    background:#0066cc;
+    z-index:999999;
+    transform:scaleX(0);
+    transform-origin:left;
+    transition:0.3s ease;
+"></div>
+<div class="wrap">
+
+  <div class="header center">ஸ்வாமியே சரணம் ஐயப்பா</div>
+
+  <!-- Mode Selection Card -->
+  <div class="card">
+    <h2 class="center" style="margin:0 0 12px 0;">ஸ்ரீ தர்ம சாஸ்தா சேவா சங்கம்</h2>
+    <label>Select Mode</label>
+    <div class="payment-box">
+      <label class="payment-option"><input type="radio" name="mode" value="amount" checked> Amount</label>
+      <label class="payment-option"><input type="radio" name="mode" value="groceries"> Groceries</label>
+      <label class="payment-option"><input type="radio" name="mode" value="vilaku"> Vilaku</label>
+    </div>
+  </div>
+
+  <!-- Amount Form Card -->
+  <div class="card" id="amountCard">
+    <h3 class="center" style="margin:0 0 6px 0;">Amount Entry</h3>
+
+    <label for="name">Name</label>
+    <input id="name" type="text" placeholder="Enter name">
+
+    <label for="door">Door No</label>
+    <input id="door" type="text" placeholder="Door / Flat no">
+
+    <label for="street">Street Name</label>
+    <select id="street">
+      <option>Maniyammai Street</option>
+      <option>Kozhavizhi Amman 1st Street</option>
+      <option>Kozhavizhi Amman 2nd Street</option>
+      <option>Kozhavizhi Amman 3rd Street</option>
+      <option>Kozhavizhi Amman 4th Street</option>
+      <option>Kozhavizhi Amman 5th Street</option>
+       <option>Kozhavizhi Amman 6th Street</option>
+      <option>Kozhavizhi Amman 7th Street</option>
+      <option>MGR Nagar 1st Street</option>
+      <option>MGR Nagar 2nd Street</option>
+      <option>MGR Nagar 3rd Street</option>
+      <option>Govindha Nagar 1st Street</option>
+      <option>Govindha Nagar 2nd Street</option>
+      <option>Govindha Nagar 3rd Street</option>
+      <option>Govindha Nagar 4th Street</option>
+      <option>Govindha Nagar 5th Street</option>
+      <option>Govindha Nagar 6th Street</option>      
+      <option>Govindha Nagar 7th Street</option>
+      <option>Others </option>
+        
+    </select>
+
+    <div class="row">
+      <div class="col">
+        <label for="amount">Amount</label>
+        <input id="amount" type="number" min="0" placeholder="Amount (numbers only)">
+      </div>
+      <div class="col">
+        <label for="balance">Balance</label>
+        <input id="balance" type="number" min="0" placeholder="Balance (pending)">
+      </div>
+    </div>
+
+    <label for="date">Date (optional)</label>
+    <input id="date" type="date" placeholder="Leave empty to use server date">
+
+    <label for="mobile">Mobile Number</label>
+    <input id="mobile" type="text" placeholder="Enter mobile number">
+
+    <label>Payment Type</label>
+    <div class="payment-box">
+      <label class="payment-option"><input type="radio" name="payment" value="GPay"> GPay</label>
+      <label class="payment-option"><input type="radio" name="payment" value="Cash"> Cash</label>
+    </div>
+
+    <label for="receiver">Receiver Name</label>
+    <select id="receiver">
+      <option>Gopi</option>
+      <option>Mahalingam</option>
+      <option>Karthikeyan</option>
+      <option>Jaganathan</option>
+      <option>Anandhan</option>
+      <option>Subramani</option>
+      <option>Saravanan</option>
+      <option>Gopi Rajendran</option>
+      <option>Prakash</option>
+        
+    </select>
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button id="submitBtn" class="btn">Submit</button>
+      <button id="updateAmountBtn" class="btn" style="background:#6c757d;">Update</button>
+    </div>
+    <button class="btn" style="background:#dc3545; margin-top:10px;" onclick="refreshPage()">Refresh</button>
+  </div>
+
+  <!-- Groceries Form Card -->
+  <div class="card hidden" id="groceriesCard">
+    <h3 class="center" style="margin:0 0 6px 0;">Groceries Entry</h3>
+
+    <label for="gName">Name</label>
+    <input id="gName" type="text" placeholder="Enter name">
+
+    <label for="gDoor">Door No</label>
+    <input id="gDoor" type="text" placeholder="Door / Flat no">
+
+    <label for="gStreet">Street Name</label>
+    <select id="gStreet">
+      <option>Maniyammai Street</option>
+      <option>Kozhavizhi Amman 1st Street</option>
+      <option>Kozhavizhi Amman 2nd Street</option>
+      <option>Kozhavizhi Amman 3rd Street</option>
+      <option>Kozhavizhi Amman 4th Street</option>
+      <option>Kozhavizhi Amman 5th Street</option>
+       <option>Kozhavizhi Amman 6th Street</option>
+      <option>Kozhavizhi Amman 7th Street</option>
+      <option>MGR Nagar 1st Street</option>
+      <option>MGR Nagar 2nd Street</option>
+      <option>MGR Nagar 3rd Street</option>
+      <option>Govindha Nagar 1st Street</option>
+      <option>Govindha Nagar 2nd Street</option>
+      <option>Govindha Nagar 3rd Street</option>
+      <option>Govindha Nagar 4th Street</option>
+      <option>Govindha Nagar 5th Street</option>
+      <option>Govindha Nagar 6th Street</option>      
+      <option>Govindha Nagar 7th Street</option>
+      <option>Others </option>
+    </select>
+
+    <label for="gItem">Item</label>
+    <select id="gItem">
+      <option>Rice</option>
+      <option>Ghee</option>
+      <option>Karpuram</option>
+      <option>Oil</option>
+      <option>Others</option>
+    </select>
+
+    <!-- Textbox for custom item when "Others" is selected -->
+    <input id="gItemOther" type="text" placeholder="Enter item name" class="hidden">
+
+    <div class="row">
+      <div class="col">
+        <label for="gQty">Quantity</label>
+        <input id="gQty" type="number" min="1" max="50" placeholder="Qty (1-50)">
+      </div>
+      <div class="col">
+        <label for="gUnit">Unit</label>
+        <select id="gUnit">
+          <option>kg</option>
+          <option>lit</option>
+          <option>ml</option>
+          <option>packet</option>
+          <option>pieces</option>
+          <option>boxes</option>
+        </select>
+      </div>
+    </div>
+
+    <label for="gPending">Pending Status</label>
+    <select id="gPending">
+      <option value="No">No</option>
+      <option value="Yes">Yes</option>
+    </select>
+
+    <label for="gReceiver">Receiver Name</label>
+    <select id="gReceiver">
+      <option>Gopi</option>
+      <option>Mahalingam</option>
+      <option>Karthikeyan</option>
+      <option>Jaganathan</option>
+      <option>Anandhan</option>
+      <option>Subramani</option>
+      <option>Gopi Rajendran</option>
+      <option>Prakash</option>
+    </select>
+
+    <label for="gDate">Date (optional)</label>
+    <input id="gDate" type="date" placeholder="Leave empty to use server date">
+
+    <label for="gMobile">Mobile Number</label>
+    <input id="gMobile" type="text" placeholder="Enter mobile number">
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button id="submitGroceryBtn" class="btn">Submit</button>
+      <button id="updateGroceryBtn" class="btn" style="background:#6c757d;">Update</button>
+    </div>
+    <button class="btn" style="background:#dc3545; margin-top:10px;" onclick="refreshPage()">Refresh</button>
+
+  </div>
+
+  <!-- Vilaku Form Card -->
+  <div class="card hidden" id="vilakuCard">
+    <h3 class="center" style="margin:0 0 6px 0;">Vilaku Entry</h3>
+
+    <label for="vName">Name</label>
+    <input id="vName" type="text" placeholder="Enter name">
+
+    <label for="vDoor">Door No</label>
+    <input id="vDoor" type="text" placeholder="Door / Flat no">
+
+    <label for="vStreet">Street Name</label>
+    <select id="vStreet">
+      <option>Maniyammai Street</option>
+      <option>Kozhavizhi Amman 1st Street</option>
+      <option>Kozhavizhi Amman 2nd Street</option>
+      <option>Kozhavizhi Amman 3rd Street</option>
+      <option>Kozhavizhi Amman 4th Street</option>
+      <option>Kozhavizhi Amman 5th Street</option>
+       <option>Kozhavizhi Amman 6th Street</option>
+      <option>Kozhavizhi Amman 7th Street</option>
+      <option>MGR Nagar 1st Street</option>
+      <option>MGR Nagar 2nd Street</option>
+      <option>MGR Nagar 3rd Street</option>
+      <option>Govindha Nagar 1st Street</option>
+      <option>Govindha Nagar 2nd Street</option>
+      <option>Govindha Nagar 3rd Street</option>
+      <option>Govindha Nagar 4th Street</option>
+      <option>Govindha Nagar 5th Street</option>
+      <option>Govindha Nagar 6th Street</option>      
+      <option>Govindha Nagar 7th Street</option>
+      <option>Others </option>
+    </select>
+
+    <label for="vAmount">Vilaku Amount</label>
+    <input id="vAmount" type="number" value="301" readonly placeholder="₹301">
+
+    <label>Payment Type</label>
+    <div class="payment-box">
+      <label class="payment-option"><input type="radio" name="vPayment" value="GPay"> GPay</label>
+      <label class="payment-option"><input type="radio" name="vPayment" value="Cash"> Cash</label>
+    </div>
+
+    <label for="vPending">Pending Status</label>
+    <select id="vPending">
+      <option value="No">No</option>
+      <option value="Yes">Yes</option>
+    </select>
+
+    <label for="vReceiver">Receiver Name</label>
+    <select id="vReceiver">
+      <option>Gopi</option>
+      <option>Mahalingam</option>
+      <option>Karthikeyan</option>
+      <option>Jaganathan</option>
+      <option>Anandhan</option>
+      <option>Subramani</option>
+      <option>Gopi Rajendran</option>
+      <option>Prakash</option>
+    </select>
+
+    <label for="vDate">Date (optional)</label>
+    <input id="vDate" type="date" placeholder="Leave empty to use server date">
+
+    <label for="vMobile">Mobile Number</label>
+    <input id="vMobile" type="text" placeholder="Enter mobile number">
+
+    <div style="margin-top:12px; display:flex; gap:10px; flex-wrap:wrap;">
+      <button id="submitVilakuBtn" class="btn">Submit</button>
+      <button id="updateVilakuBtn" class="btn" style="background:#6c757d;">Update</button>
+    </div>
+    <button class="btn" style="background:#dc3545; margin-top:10px;" onclick="refreshPage()">Refresh</button>
+
+  </div>
+
+  <!-- Amount Report Card -->
+  <div class="card" id="amountReportCard">
+    <h3 style="margin:0 0 8px 0;" class="center">Amount Report</h3>
+
+    <div class="row">
+      <div class="col">
+        <label for="fromDate">From Date</label>
+        <input id="fromDate" type="date">
+      </div>
+      <div class="col">
+        <label for="toDate">To Date</label>
+        <input id="toDate" type="date">
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label for="filterType">Show</label>
+      <select id="filterType">
+        <option value="amount">Total Amount</option>
+        <option value="pending">Total Pending</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <div style="flex:1;">
+        <button id="filterBtn" class="btn">Get Report</button>
+      </div>
+      <div id="statusMsg" style="min-width:160px; text-align:right;"></div>
+    </div>
+
+    <div class="summary" id="summaryBox" style="display:none;">
+      <div class="box"><strong>Total Amount</strong><div id="totalAmount">₹0</div></div>
+      <div class="box"><strong>Total Pending</strong><div id="totalPending">₹0</div></div>
+    </div>
+
+    <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+      <button id="downloadBtn" class="btn" style="background:#28a745;">Download Report (CSV)</button>
+    </div>
+
+    <div id="tableWrap">
+      <table id="resultTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Door</th><th>Street</th><th>Amount</th><th>Balance</th>
+            <th>Payment</th><th>Receiver</th><th>Date</th><th>Mobile</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Groceries Report Card -->
+  <div class="card hidden" id="groceryReportCard">
+    <h3 style="margin:0 0 8px 0;" class="center">Groceries Report</h3>
+
+    <div class="row">
+      <div class="col">
+        <label for="gFromDate">From Date</label>
+        <input id="gFromDate" type="date">
+      </div>
+      <div class="col">
+        <label for="gToDate">To Date</label>
+        <input id="gToDate" type="date">
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label for="gFilterPending">Pending Status</label>
+      <select id="gFilterPending">
+        <option value="all">All</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <div style="flex:1;">
+        <button id="gFilterBtn" class="btn">Get Report</button>
+      </div>
+      <div id="gStatusMsg" style="min-width:160px; text-align:right;"></div>
+    </div>
+
+    <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+      <button id="gDownloadBtn" class="btn" style="background:#28a745;">Download Report (CSV)</button>
+    </div>
+
+    <div id="groceryTableWrap">
+      <table id="groceryResultTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Door</th><th>Street</th><th>Item</th><th>Qty</th>
+            <th>Unit</th><th>Pending</th><th>Receiver</th><th>Date</th><th>Mobile</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Vilaku Report Card -->
+  <div class="card hidden" id="vilakuReportCard">
+    <h3 style="margin:0 0 8px 0;" class="center">Vilaku Report</h3>
+
+    <div class="row">
+      <div class="col">
+        <label for="vFromDate">From Date</label>
+        <input id="vFromDate" type="date">
+      </div>
+      <div class="col">
+        <label for="vToDate">To Date</label>
+        <input id="vToDate" type="date">
+      </div>
+    </div>
+
+    <div style="margin-top:10px;">
+      <label for="vFilterPending">Pending Status</label>
+      <select id="vFilterPending">
+        <option value="all">All</option>
+        <option value="Yes">Yes</option>
+        <option value="No">No</option>
+      </select>
+    </div>
+
+    <div class="controls">
+      <div style="flex:1%;">
+        <button id="vFilterBtn" class="btn">Get Report</button>
+      </div>
+      <div id="vStatusMsg" style="min-width:160px; text-align:right;"></div>
+    </div>
+
+    <div class="summary" id="vSummaryBox" style="display:none;">
+      <div class="box"><strong>Total Amount</strong><div id="vTotalAmount">₹0</div></div>
+      <div class="box"><strong>Total Count</strong><div id="vTotalCount">0</div></div>
+    </div>
+
+    <div style="margin-top:10px; display:flex; gap:10px; align-items:center;">
+      <button id="vDownloadBtn" class="btn" style="background:#28a745;">Download Report (CSV)</button>
+    </div>
+
+    <div id="vilakuTableWrap">
+      <table id="vilakuResultTable">
+        <thead>
+          <tr>
+            <th>Name</th><th>Door</th><th>Street</th><th>Amount</th><th>Payment</th>
+            <th>Pending</th><th>Receiver</th><th>Date</th><th>Mobile</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<!-- Search Modal for Update -->
+<div id="searchModal" class="hidden">
+  <div class="modal-backdrop"></div>
+  <div class="card">
+    <h3 class="center" id="searchTitle" style="margin:0 0 8px 0;">Search</h3>
+    <label for="searchInput">Enter Name or Mobile Number</label>
+    <input id="searchInput" type="text" placeholder="Type name or mobile and click Search">
+    <div class="controls">
+      <button id="searchBtn" class="btn">Search</button>
+      <button id="closeSearchBtn" class="btn" style="background:#6c757d;">Close</button>
+      <div id="searchStatusMsg" style="flex:1; text-align:right;"></div>
+    </div>
+    <div id="searchTableWrap">
+      <table id="searchResultTable">
+        <thead>
+          <tr id="searchHeaderRow"></tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbyVkeYA_zkJqUy7REIkCtwvHCEWiRdYxk9WXqiNP557YFU0x2ySs-8fy6cfOLpy2o6ozw/exec"; 
+
+// ---------- USER + PERMISSIONS FROM LOGIN ----------
+let currentUser = null;
+
+function getUserFromStorage() {
+  try {
+    const raw = localStorage.getItem('ayyappaUser');
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) {
+    return null;
+  }
+}
+
+(function ensureLoggedIn(){
+  currentUser = getUserFromStorage();
+  if (!currentUser) {
+    alert('Please login first');
+    // change to your login file if needed (e.g. "index.html")
+    window.location.href = 'login.html';
+  }
+})();
+
+function rupee(x){ return '₹' + Number(x || 0).toLocaleString('en-IN'); }
+function esc(s){ if (!s && s !== 0) return ''; return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ---------- DOM ELEMENTS ----------
+const submitBtn = document.getElementById('submitBtn');
+const submitGroceryBtn = document.getElementById('submitGroceryBtn');
+const submitVilakuBtn = document.getElementById('submitVilakuBtn');
+const filterBtn = document.getElementById('filterBtn');
+const gFilterBtn = document.getElementById('gFilterBtn');
+const vFilterBtn = document.getElementById('vFilterBtn');
+const downloadBtn = document.getElementById('downloadBtn');
+const gDownloadBtn = document.getElementById('gDownloadBtn');
+const vDownloadBtn = document.getElementById('vDownloadBtn');
+const statusMsg = document.getElementById('statusMsg');
+const gStatusMsg = document.getElementById('gStatusMsg');
+const vStatusMsg = document.getElementById('vStatusMsg');
+
+// Update buttons
+const updateAmountBtn = document.getElementById('updateAmountBtn');
+const updateGroceryBtn = document.getElementById('updateGroceryBtn');
+const updateVilakuBtn = document.getElementById('updateVilakuBtn');
+
+// Search modal elements
+const searchModal = document.getElementById('searchModal');
+const searchTitle = document.getElementById('searchTitle');
+const searchInput = document.getElementById('searchInput');
+const searchBtn = document.getElementById('searchBtn');
+const closeSearchBtn = document.getElementById('closeSearchBtn');
+const searchStatusMsg = document.getElementById('searchStatusMsg');
+const searchTableWrap = document.getElementById('searchTableWrap');
+const searchHeaderRow = document.getElementById('searchHeaderRow');
+const searchResultTbody = document.querySelector('#searchResultTable tbody');
+const searchBackdrop = document.querySelector('#searchModal .modal-backdrop');
+
+let lastFetchedRows = [];
+let lastFetchedGroceryRows = [];
+let lastFetchedVilakuRows = [];
+
+// For update flow
+let currentUpdateType = null;
+let currentAmountUpdateRow = null;
+let currentGroceryUpdateRow = null;
+let currentVilakuUpdateRow = null;
+
+// Groceries "Others" item elements
+const gItemSelect = document.getElementById('gItem');
+const gItemOtherInput = document.getElementById('gItemOther');
+
+// ---------- APPLY PERMISSIONS TO UI ----------
+function applyPermissions() {
+  if (!currentUser) return;
+
+  // Modes
+  const amountModeLabel = document.querySelector('input[name="mode"][value="amount"]')?.closest('label');
+  const groceryModeLabel = document.querySelector('input[name="mode"][value="groceries"]')?.closest('label');
+  const vilakuModeLabel  = document.querySelector('input[name="mode"][value="vilaku"]')?.closest('label');
+
+  if (!currentUser.canAmount && amountModeLabel) {
+    amountModeLabel.style.display = 'none';
+    document.getElementById('amountCard').classList.add('hidden');
+    document.getElementById('amountReportCard').classList.add('hidden');
+  }
+  if (!currentUser.canGroceries && groceryModeLabel) {
+    groceryModeLabel.style.display = 'none';
+    document.getElementById('groceriesCard').classList.add('hidden');
+    document.getElementById('groceryReportCard').classList.add('hidden');
+  }
+  if (!currentUser.canVilaku && vilakuModeLabel) {
+    vilakuModeLabel.style.display = 'none';
+    document.getElementById('vilakuCard').classList.add('hidden');
+    document.getElementById('vilakuReportCard').classList.add('hidden');
+  }
+
+  // If current default mode is not allowed, switch to first allowed
+  const modeRadios = Array.from(document.querySelectorAll('input[name="mode"]'));
+  let hasChecked = modeRadios.some(r => r.checked);
+  if (!hasChecked || (modeRadios.find(r => r.checked && r.value === 'amount') && !currentUser.canAmount)) {
+    for (const r of modeRadios) {
+      if (r.value === 'amount' && currentUser.canAmount) { r.checked = true; r.dispatchEvent(new Event('change')); return; }
+      if (r.value === 'groceries' && currentUser.canGroceries) { r.checked = true; r.dispatchEvent(new Event('change')); return; }
+      if (r.value === 'vilaku' && currentUser.canVilaku) { r.checked = true; r.dispatchEvent(new Event('change')); return; }
+    }
+  }
+
+  // Submit permission
+  if (!currentUser.canSubmit) {
+    if (submitBtn) submitBtn.disabled = true;
+    if (submitGroceryBtn) submitGroceryBtn.disabled = true;
+    if (submitVilakuBtn) submitVilakuBtn.disabled = true;
+  }
+
+  // Update permission
+  if (!currentUser.canUpdate) {
+    if (updateAmountBtn) updateAmountBtn.disabled = true;
+    if (updateGroceryBtn) updateGroceryBtn.disabled = true;
+    if (updateVilakuBtn) updateVilakuBtn.disabled = true;
+  }
+
+  // Reset permission (Refresh buttons)
+  if (!currentUser.canReset) {
+    // Refresh buttons are inline with onclick="refreshPage()"
+    // We'll just disable them:
+    document.querySelectorAll('button[onclick="refreshPage()"]').forEach(btn => {
+      btn.disabled = true;
+    });
+  }
+
+  // Download permission
+  if (!currentUser.canDownload) {
+    if (downloadBtn)   downloadBtn.style.display = 'none';
+    if (gDownloadBtn) gDownloadBtn.style.display = 'none';
+    if (vDownloadBtn) vDownloadBtn.style.display = 'none';
+  }
+}
+
+// ---------- LOADING HELPERS ----------
+function setLoading(el, statusEl, isLoading, text) {
+  if (isLoading) { 
+    el.disabled = true; 
+    statusEl.innerHTML = '<span style="color:#666;">'+(text||'Working...')+'</span> <span class="loader"></span>'; 
+  } else { 
+    el.disabled = false; 
+    statusEl.innerHTML = ''; 
+  }
+}
+
+// Show / hide "Other item" textbox
+if (gItemSelect && gItemOtherInput) {
+  gItemSelect.addEventListener('change', () => {
+    if (gItemSelect.value === 'Others') {
+      gItemOtherInput.classList.remove('hidden');
+    } else {
+      gItemOtherInput.classList.add('hidden');
+      gItemOtherInput.value = '';
+    }
+  });
+}
+
+// ---------- MODE SWITCHING ----------
+document.querySelectorAll('input[name="mode"]').forEach(radio => {
+  radio.addEventListener('change', (e) => {
+    const mode = e.target.value;
+    document.getElementById('amountCard').classList.add('hidden');
+    document.getElementById('groceriesCard').classList.add('hidden');
+    document.getElementById('vilakuCard').classList.add('hidden');
+    document.getElementById('amountReportCard').classList.add('hidden');
+    document.getElementById('groceryReportCard').classList.add('hidden');
+    document.getElementById('vilakuReportCard').classList.add('hidden');
+    
+    if (mode === 'amount' && currentUser.canAmount) {
+      document.getElementById('amountCard').classList.remove('hidden');
+      document.getElementById('amountReportCard').classList.remove('hidden');
+    } else if (mode === 'groceries' && currentUser.canGroceries) {
+      document.getElementById('groceriesCard').classList.remove('hidden');
+      document.getElementById('groceryReportCard').classList.remove('hidden');
+    } else if (mode === 'vilaku' && currentUser.canVilaku) {
+      document.getElementById('vilakuCard').classList.remove('hidden');
+      document.getElementById('vilakuReportCard').classList.remove('hidden');
+    } else {
+      alert('You do not have permission for this mode.');
+    }
+  });
+});
+
+// --------- SEARCH MODAL (UPDATE FLOW) ---------
+function openSearchModal(mode){
+  if (!currentUser || !currentUser.canUpdate) {
+    alert('You are not allowed to update records.');
+    return;
+  }
+  currentUpdateType = mode;
+  searchInput.value = '';
+  searchStatusMsg.innerHTML = '';
+  searchHeaderRow.innerHTML = '';
+  searchResultTbody.innerHTML = '';
+  searchTableWrap.style.display = 'none';
+
+  if(mode === 'amount') searchTitle.textContent = 'Search Amount Records';
+  else if(mode === 'grocery') searchTitle.textContent = 'Search Grocery Records';
+  else if(mode === 'vilaku') searchTitle.textContent = 'Search Vilaku Records';
+
+  searchModal.classList.remove('hidden');
+}
+
+function closeSearchModal(){
+  searchModal.classList.add('hidden');
+}
+
+updateAmountBtn.addEventListener('click', ()=>openSearchModal('amount'));
+updateGroceryBtn.addEventListener('click', ()=>openSearchModal('grocery'));
+updateVilakuBtn.addEventListener('click', ()=>openSearchModal('vilaku'));
+closeSearchBtn.addEventListener('click', closeSearchModal);
+if (searchBackdrop) {
+  searchBackdrop.addEventListener('click', closeSearchModal);
+}
+
+searchBtn.addEventListener('click', async ()=>{
+  const q = searchInput.value.trim();
+  if(!q){ alert('Enter name or mobile number'); return; }
+  if(!currentUpdateType){ alert('Select a form first'); return; }
+
+  let typeParam = '';
+  if(currentUpdateType === 'amount') typeParam = 'search-amount';
+  else if(currentUpdateType === 'grocery') typeParam = 'search-grocery';
+  else if(currentUpdateType === 'vilaku') typeParam = 'search-vilaku';
+
+  try{
+    setLoading(searchBtn, searchStatusMsg, true, 'Searching...');
+    const url = scriptURL + '?type=' + encodeURIComponent(typeParam) + '&q=' + encodeURIComponent(q);
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status !== 'search-success'){ alert('Error: ' + (data.message || 'Unknown')); return; }
+
+    const rows = data.rows || [];
+    searchResultTbody.innerHTML = '';
+    searchHeaderRow.innerHTML = '';
+
+    if(!rows.length){
+      searchTableWrap.style.display = 'none';
+      searchStatusMsg.innerHTML = '<strong>No matching records</strong>';
+      return;
+    }
+
+    let headers = [];
+    if(currentUpdateType === 'amount'){
+      headers = ["Name","Door","Street","Amount","Balance","Payment","Receiver","Date","Mobile"];
+    } else if(currentUpdateType === 'grocery'){
+      headers = ["Name","Door","Street","Item","Qty","Unit","Pending","Receiver","Date","Mobile"];
+    } else if(currentUpdateType === 'vilaku'){
+      headers = ["Name","Door","Street","Amount","Payment","Pending","Receiver","Date","Mobile"];
+    }
+
+    headers.forEach(h=>{
+      const th = document.createElement('th');
+      th.textContent = h;
+      searchHeaderRow.appendChild(th);
+    });
+
+    rows.forEach(r=>{
+      const tr = document.createElement('tr');
+      tr.style.cursor = 'pointer';
+      let cells = [];
+      if(currentUpdateType === 'amount'){
+        cells = [r.name,r.door,r.street,rupee(r.amount),rupee(r.balance),r.payment,r.receiver,r.date,r.mobile];
+      } else if(currentUpdateType === 'grocery'){
+        cells = [r.name,r.door,r.street,r.item,r.qty,r.unit,r.pending,r.receiver,r.date,r.mobile];
+      } else if(currentUpdateType === 'vilaku'){
+        cells = [r.name,r.door,r.street,rupee(r.amount),r.payment,r.pending,r.receiver,r.date,r.mobile];
+      }
+      cells.forEach(val=>{
+        const td = document.createElement('td');
+        td.textContent = (val === null || val === undefined) ? '' : val;
+        tr.appendChild(td);
+      });
+      tr.addEventListener('click', ()=>selectSearchRecord(r));
+      searchResultTbody.appendChild(tr);
+    });
+
+    searchTableWrap.style.display = 'block';
+    searchStatusMsg.innerHTML = '<strong>Found ' + rows.length + ' record(s)</strong>';
+  } catch(err){
+    alert('Error during search.\n' + err);
+  } finally {
+    setLoading(searchBtn, searchStatusMsg, false);
+  }
+});
+
+function selectSearchRecord(r){
+  if(currentUpdateType === 'amount'){
+    currentAmountUpdateRow = r.rowIndex;
+    document.getElementById('name').value = r.name || '';
+    document.getElementById('door').value = r.door || '';
+    document.getElementById('street').value = r.street || '';
+    document.getElementById('amount').value = (r.amount != null ? r.amount : '');
+    document.getElementById('balance').value = (r.balance != null ? r.balance : '');
+    document.getElementById('date').value = r.date || '';
+    document.getElementById('mobile').value = r.mobile || '';
+    document.querySelectorAll('input[name="payment"]').forEach(i=>{ i.checked = (i.value === r.payment); });
+    document.getElementById('receiver').value = r.receiver || '';
+  } else if(currentUpdateType === 'grocery'){
+    currentGroceryUpdateRow = r.rowIndex;
+    document.getElementById('gName').value = r.name || '';
+    document.getElementById('gDoor').value = r.door || '';
+    document.getElementById('gStreet').value = r.street || '';
+
+    const baseItems = ['Rice','Ghee','Karpuram','Oil'];
+    if (baseItems.includes(r.item)) {
+      gItemSelect.value = r.item;
+      if (gItemOtherInput) {
+        gItemOtherInput.classList.add('hidden');
+        gItemOtherInput.value = '';
+      }
+    } else if (r.item) {
+      gItemSelect.value = 'Others';
+      if (gItemOtherInput) {
+        gItemOtherInput.classList.remove('hidden');
+        gItemOtherInput.value = r.item;
+      }
+    } else {
+      gItemSelect.value = 'Rice';
+      if (gItemOtherInput) {
+        gItemOtherInput.classList.add('hidden');
+        gItemOtherInput.value = '';
+      }
+    }
+
+    document.getElementById('gQty').value = (r.qty != null ? r.qty : '');
+    document.getElementById('gUnit').value = r.unit || '';
+    document.getElementById('gPending').value = r.pending || 'No';
+    document.getElementById('gReceiver').value = r.receiver || '';
+    document.getElementById('gDate').value = r.date || '';
+    document.getElementById('gMobile').value = r.mobile || '';
+  } else if(currentUpdateType === 'vilaku'){
+    currentVilakuUpdateRow = r.rowIndex;
+    document.getElementById('vName').value = r.name || '';
+    document.getElementById('vDoor').value = r.door || '';
+    document.getElementById('vStreet').value = r.street || '';
+    document.getElementById('vAmount').value = (r.amount != null ? r.amount : 301);
+    document.getElementById('vPending').value = r.pending || 'No';
+    document.getElementById('vReceiver').value = r.receiver || '';
+    document.getElementById('vDate').value = r.date || '';
+    document.getElementById('vMobile').value = r.mobile || '';
+    document.querySelectorAll('input[name="vPayment"]').forEach(i=>{ i.checked = (i.value === r.payment); });
+  }
+  closeSearchModal();
+}
+
+// --------- REPORT FUNCTIONS (same as before) ---------
+async function fetchReport(from, to){
+  if(!from||!to){ alert('Select dates'); return; }
+  try{
+    setLoading(filterBtn, statusMsg, true,'Fetching...');
+    const url = scriptURL+'?type=amount&from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to);
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status!=='filter-success'){ alert('Error: '+(data.message||'Unknown')); return; }
+
+    lastFetchedRows = data.rows || [];
+    const filterType = document.getElementById('filterType').value;
+    let filtered=[], totalAmount=0, totalPending=0;
+
+    if(filterType==='amount'){
+      filtered = lastFetchedRows.filter(r=>Number(r.balance)>=0 && Number(r.amount)>0);
+      totalAmount = filtered.reduce((s,r)=>s+Number(r.amount),0);
+    } else {
+      filtered = lastFetchedRows.filter(r=>Number(r.balance)>0);
+      totalPending = filtered.reduce((s,r)=>s+Number(r.balance),0);
+    }
+
+    document.getElementById('summaryBox').style.display='flex';
+    document.getElementById('totalAmount').innerText = rupee(totalAmount||data.totalAmount||0);
+    document.getElementById('totalPending').innerText = rupee(totalPending||data.totalPending||0);
+
+    const tbody = document.querySelector('#resultTable tbody');
+    tbody.innerHTML='';
+    if(filtered.length){
+      filtered.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td>'+esc(r.name)+'</td>'+
+          '<td>'+esc(r.door)+'</td>'+
+          '<td>'+esc(r.street)+'</td>'+
+          '<td>'+rupee(r.amount)+'</td>'+
+          '<td>'+rupee(r.balance)+'</td>'+
+          '<td>'+esc(r.payment)+'</td>'+
+          '<td>'+esc(r.receiver)+'</td>'+
+          '<td>'+esc(r.date)+'</td>'+
+          '<td>'+esc(r.mobile)+'</td>';
+        tbody.appendChild(tr);
+      });
+      document.getElementById('tableWrap').style.display='block';
+    } else { document.getElementById('tableWrap').style.display='none'; }
+
+    if(filterType==='amount'){ statusMsg.innerHTML='<strong>Total Amount: '+rupee(totalAmount)+'</strong>'; }
+    else { statusMsg.innerHTML='<strong>Total Pending: '+rupee(totalPending)+'</strong>'; }
+  }catch(err){ alert('Error fetching report.\n'+err); }
+  finally{ setLoading(filterBtn, statusMsg, false); }
+}
+
+async function fetchGroceryReport(from, to, pending){
+  if(!from||!to){ alert('Select dates'); return; }
+  try{
+    setLoading(gFilterBtn, gStatusMsg, true,'Fetching...');
+    const url = scriptURL+'?type=grocery&from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'&pending='+encodeURIComponent(pending);
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status!=='filter-success'){ alert('Error: '+(data.message||'Unknown')); return; }
+
+    lastFetchedGroceryRows = data.rows || [];
+
+    const tbody = document.querySelector('#groceryResultTable tbody');
+    tbody.innerHTML='';
+    if(lastFetchedGroceryRows.length){
+      lastFetchedGroceryRows.forEach(r=>{
+        const tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td>'+esc(r.name)+'</td>'+
+          '<td>'+esc(r.door)+'</td>'+
+          '<td>'+esc(r.street)+'</td>'+
+          '<td>'+esc(r.item)+'</td>'+
+          '<td>'+esc(r.qty)+'</td>'+
+          '<td>'+esc(r.unit)+'</td>'+
+          '<td>'+esc(r.pending)+'</td>'+
+          '<td>'+esc(r.receiver)+'</td>'+
+          '<td>'+esc(r.date)+'</td>'+
+          '<td>'+esc(r.mobile)+'</td>';
+        tbody.appendChild(tr);
+      });
+      document.getElementById('groceryTableWrap').style.display='block';
+      gStatusMsg.innerHTML='<strong>Total Records: '+lastFetchedGroceryRows.length+'</strong>';
+    } else { 
+      document.getElementById('groceryTableWrap').style.display='none'; 
+      gStatusMsg.innerHTML='<strong>No records found</strong>';
+    }
+  }catch(err){ alert('Error fetching grocery report.\n'+err); }
+  finally{ setLoading(gFilterBtn, gStatusMsg, false); }
+}
+
+async function fetchVilakuReport(from, to, pending){
+  if(!from||!to){ alert('Select dates'); return; }
+  try{
+    setLoading(vFilterBtn, vStatusMsg, true,'Fetching...');
+    const url = scriptURL+'?type=vilaku&from='+encodeURIComponent(from)+'&to='+encodeURIComponent(to)+'&pending='+encodeURIComponent(pending);
+    const res = await fetch(url);
+    const data = await res.json();
+    if(data.status!=='filter-success'){ alert('Error: '+(data.message||'Unknown')); return; }
+
+    lastFetchedVilakuRows = data.rows || [];
+
+    let totalAmount = 0;
+    const tbody = document.querySelector('#vilakuResultTable tbody');
+    tbody.innerHTML='';
+    if(lastFetchedVilakuRows.length){
+      lastFetchedVilakuRows.forEach(r=>{
+        totalAmount += Number(r.amount || 0);
+        const tr=document.createElement('tr');
+        tr.innerHTML=
+          '<td>'+esc(r.name)+'</td>'+
+          '<td>'+esc(r.door)+'</td>'+
+          '<td>'+esc(r.street)+'</td>'+
+          '<td>'+rupee(r.amount)+'</td>'+
+          '<td>'+esc(r.payment)+'</td>'+
+          '<td>'+esc(r.pending)+'</td>'+
+          '<td>'+esc(r.receiver)+'</td>'+
+          '<td>'+esc(r.date)+'</td>'+
+          '<td>'+esc(r.mobile)+'</td>';
+        tbody.appendChild(tr);
+      });
+      document.getElementById('vilakuTableWrap').style.display='block';
+      document.getElementById('vSummaryBox').style.display='flex';
+      document.getElementById('vTotalAmount').innerText = rupee(totalAmount);
+      document.getElementById('vTotalCount').innerText = lastFetchedVilakuRows.length;
+      vStatusMsg.innerHTML='<strong>Total: '+rupee(totalAmount)+' ('+lastFetchedVilakuRows.length+' records)</strong>';
+    } else { 
+      document.getElementById('vilakuTableWrap').style.display='none'; 
+      document.getElementById('vSummaryBox').style.display='none';
+      vStatusMsg.innerHTML='<strong>No records found</strong>';
+    }
+  }catch(err){ alert('Error fetching vilaku report.\n'+err); }
+  finally{ setLoading(vFilterBtn, vStatusMsg, false); }
+}
+
+// --------- SUBMIT (INSERT / UPDATE) ---------
+submitBtn.addEventListener('click', async ()=>{
+  if (!currentUser || !currentUser.canSubmit) { alert('Not allowed to submit'); return; }
+
+  const name=document.getElementById('name').value.trim();
+  const door=document.getElementById('door').value.trim();
+  const street=document.getElementById('street').value;
+  const amount=document.getElementById('amount').value;
+  const balance=document.getElementById('balance').value;
+  const dateVal=document.getElementById('date').value;
+  const paymentEl=document.querySelector('input[name="payment"]:checked');
+  const receiver=document.getElementById('receiver').value;
+  const mobile=document.getElementById('mobile').value.trim();
+
+  if(!name||!door||!amount){ alert('Fill Name, Door & Amount'); return; }
+  if(!paymentEl){ alert('Select Payment Type'); return; }
+
+  let payloadType = 'amount';
+  if(currentAmountUpdateRow){ payloadType = 'update-amount'; }
+
+  const payload={type:payloadType, rowIndex: currentAmountUpdateRow, name,door,street,amount:Number(amount),balance:Number(balance||0),payment:paymentEl.value,receiver,mobile};
+  if(dateVal) payload.date=dateVal;
+
+  try{
+    setLoading(submitBtn, statusMsg, true,'Saving...');
+    const res=await fetch(scriptURL,{method:'POST',body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(data.status==='duplicate'){ alert('Duplicate record'); }
+    else if(data.status==='success'){
+      alert('Saved successfully');
+      currentAmountUpdateRow = null;
+      document.getElementById('name').value='';
+      document.getElementById('door').value='';
+      document.getElementById('amount').value='';
+      document.getElementById('balance').value='';
+      document.getElementById('date').value='';
+      document.getElementById('mobile').value='';
+      document.querySelectorAll('input[name="payment"]').forEach(i=>i.checked=false);
+      const from=document.getElementById('fromDate').value;
+      const to=document.getElementById('toDate').value;
+      if(from&&to) fetchReport(from,to);
+    } else if(data.status==='updated'){
+      alert('Updated successfully');
+      currentAmountUpdateRow = null;
+      const from=document.getElementById('fromDate').value;
+      const to=document.getElementById('toDate').value;
+      if(from&&to) fetchReport(from,to);
+    } else { alert('Error: '+(data.message||'Unknown')); }
+  } catch(err){ alert('Network error.\n'+err); }
+  finally{ setLoading(submitBtn, statusMsg, false); }
+});
+
+submitGroceryBtn.addEventListener('click', async ()=>{
+  if (!currentUser || !currentUser.canSubmit) { alert('Not allowed to submit'); return; }
+
+  const name=document.getElementById('gName').value.trim();
+  const door=document.getElementById('gDoor').value.trim();
+  const street=document.getElementById('gStreet').value;
+  let item=document.getElementById('gItem').value;
+  const qty=document.getElementById('gQty').value;
+  const unit=document.getElementById('gUnit').value;
+  const pending=document.getElementById('gPending').value;
+  const receiver=document.getElementById('gReceiver').value;
+  const dateVal=document.getElementById('gDate').value;
+  const mobile=document.getElementById('gMobile').value.trim();
+
+  if(!name||!door||!qty){ alert('Fill Name, Door & Quantity'); return; }
+
+  if (item === 'Others') {
+    const otherVal = gItemOtherInput ? gItemOtherInput.value.trim() : '';
+    if (!otherVal) {
+      alert('Enter item name for Others');
+      return;
+    }
+    item = otherVal;
+  }
+
+  let payloadType = 'grocery';
+  if(currentGroceryUpdateRow){ payloadType = 'update-grocery'; }
+
+  const payload={type:payloadType,rowIndex: currentGroceryUpdateRow,name,door,street,item,qty:Number(qty),unit,pending,receiver,mobile};
+  if(dateVal) payload.date=dateVal;
+
+  try{
+    setLoading(submitGroceryBtn, gStatusMsg, true,'Saving...');
+    const res=await fetch(scriptURL,{method:'POST',body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(data.status==='duplicate'){ alert('Duplicate record'); }
+    else if(data.status==='success'){
+      alert('Saved successfully');
+      currentGroceryUpdateRow = null;
+      document.getElementById('gName').value='';
+      document.getElementById('gDoor').value='';
+      document.getElementById('gQty').value='';
+      document.getElementById('gDate').value='';
+      document.getElementById('gMobile').value='';
+      if (gItemSelect && gItemOtherInput) {
+        gItemSelect.value = 'Rice';
+        gItemOtherInput.classList.add('hidden');
+        gItemOtherInput.value = '';
+      }
+      const from=document.getElementById('gFromDate').value;
+      const to=document.getElementById('gToDate').value;
+      const pendingFilter=document.getElementById('gFilterPending').value;
+      if(from&&to) fetchGroceryReport(from,to,pendingFilter);
+    } else if(data.status==='updated'){
+      alert('Updated successfully');
+      currentGroceryUpdateRow = null;
+      const from=document.getElementById('gFromDate').value;
+      const to=document.getElementById('gToDate').value;
+      const pendingFilter=document.getElementById('gFilterPending').value;
+      if(from&&to) fetchGroceryReport(from,to,pendingFilter);
+    } else { alert('Error: '+(data.message||'Unknown')); }
+  } catch(err){ alert('Network error.\n'+err); }
+  finally{ setLoading(submitGroceryBtn, gStatusMsg, false); }
+});
+
+submitVilakuBtn.addEventListener('click', async ()=>{
+  if (!currentUser || !currentUser.canSubmit) { alert('Not allowed to submit'); return; }
+
+  const name=document.getElementById('vName').value.trim();
+  const door=document.getElementById('vDoor').value.trim();
+  const street=document.getElementById('vStreet').value;
+  const amount=document.getElementById('vAmount').value;
+  const paymentEl=document.querySelector('input[name="vPayment"]:checked');
+  const pending=document.getElementById('vPending').value;
+  const receiver=document.getElementById('vReceiver').value;
+  const dateVal=document.getElementById('vDate').value;
+  const mobile=document.getElementById('vMobile').value.trim();
+
+  if(!name||!door){ alert('Fill Name & Door'); return; }
+  if(!paymentEl){ alert('Select Payment Type'); return; }
+
+  let payloadType = 'vilaku';
+  if(currentVilakuUpdateRow){ payloadType = 'update-vilaku'; }
+
+  const payload={type:payloadType,rowIndex: currentVilakuUpdateRow,name,door,street,amount:Number(amount),payment:paymentEl.value,pending,receiver,mobile};
+  if(dateVal) payload.date=dateVal;
+
+  try{
+    setLoading(submitVilakuBtn, vStatusMsg, true,'Saving...');
+    const res=await fetch(scriptURL,{method:'POST',body:JSON.stringify(payload)});
+    const data=await res.json();
+    if(data.status==='duplicate'){ alert('Duplicate record'); }
+    else if(data.status==='success'){
+      alert('Saved successfully');
+      currentVilakuUpdateRow = null;
+      document.getElementById('vName').value='';
+      document.getElementById('vDoor').value='';
+      document.getElementById('vDate').value='';
+      document.getElementById('vMobile').value='';
+      document.querySelectorAll('input[name="vPayment"]').forEach(i=>i.checked=false);
+      const from=document.getElementById('vFromDate').value;
+      const to=document.getElementById('vToDate').value;
+      const pendingFilter=document.getElementById('vFilterPending').value;
+      if(from&&to) fetchVilakuReport(from,to,pendingFilter);
+    } else if(data.status==='updated'){
+      alert('Updated successfully');
+      currentVilakuUpdateRow = null;
+      const from=document.getElementById('vFromDate').value;
+      const to=document.getElementById('vToDate').value;
+      const pendingFilter=document.getElementById('vFilterPending').value;
+      if(from&&to) fetchVilakuReport(from,to,pendingFilter);
+    } else { alert('Error: '+(data.message||'Unknown')); }
+  } catch(err){ alert('Network error.\n'+err); }
+  finally{ setLoading(submitVilakuBtn, vStatusMsg, false); }
+});
+
+// Filter buttons
+filterBtn.addEventListener('click',()=>{ 
+  const from=document.getElementById('fromDate').value; 
+  const to=document.getElementById('toDate').value; 
+  fetchReport(from,to); 
+});
+
+gFilterBtn.addEventListener('click',()=>{ 
+  const from=document.getElementById('gFromDate').value; 
+  const to=document.getElementById('gToDate').value; 
+  const pending=document.getElementById('gFilterPending').value;
+  fetchGroceryReport(from,to,pending); 
+});
+
+vFilterBtn.addEventListener('click',()=>{ 
+  const from=document.getElementById('vFromDate').value; 
+  const to=document.getElementById('vToDate').value; 
+  const pending=document.getElementById('vFilterPending').value;
+  fetchVilakuReport(from,to,pending); 
+});
+
+// Download buttons (respect already-hidden if no permission)
+downloadBtn.addEventListener('click',()=>{
+  const from=document.getElementById('fromDate').value;
+  const to=document.getElementById('toDate').value;
+  if(!from||!to){ alert('Select dates first'); return; }
+  const filterType=document.getElementById('filterType').value;
+  let filtered=[];
+  if(filterType==='amount'){ filtered=lastFetchedRows.filter(r=>Number(r.balance)===0 && Number(r.amount)>0); }
+  else{ filtered=lastFetchedRows.filter(r=>Number(r.balance)>0); }
+  if(!filtered.length){ alert('No rows to download'); return; }
+
+  const headers=["Name","Door No","Street","Amount","Balance","Payment","Receiver","Date","Mobile"];
+  const rows=filtered.map(r=>[r.name,r.door,r.street,r.amount,r.balance,r.payment,r.receiver,r.date,r.mobile]);
+  downloadCSV(headers, rows, 'Amount_Report_'+from+'_to_'+to+'.csv');
+});
+
+gDownloadBtn.addEventListener('click',()=>{
+  const from=document.getElementById('gFromDate').value;
+  const to=document.getElementById('gToDate').value;
+  if(!from||!to){ alert('Select dates first'); return; }
+  if(!lastFetchedGroceryRows.length){ alert('No rows to download'); return; }
+
+  const headers=["Name","Door No","Street","Item","Qty","Unit","Pending","Receiver","Date","Mobile"];
+  const rows=lastFetchedGroceryRows.map(r=>[r.name,r.door,r.street,r.item,r.qty,r.unit,r.pending,r.receiver,r.date,r.mobile]);
+  downloadCSV(headers, rows, 'Grocery_Report_'+from+'_to_'+to+'.csv');
+});
+
+vDownloadBtn.addEventListener('click',()=>{
+  const from=document.getElementById('vFromDate').value;
+  const to=document.getElementById('vToDate').value;
+  if(!from||!to){ alert('Select dates first'); return; }
+  if(!lastFetchedVilakuRows.length){ alert('No rows to download'); return; }
+
+  const headers=["Name","Door No","Street","Amount","Payment","Pending","Receiver","Date","Mobile"];
+  const rows=lastFetchedVilakuRows.map(r=>[r.name,r.door,r.street,r.amount,r.payment,r.pending,r.receiver,r.date,r.mobile]);
+  downloadCSV(headers, rows, 'Vilaku_Report_'+from+'_to_'+to+'.csv');
+});
+
+function downloadCSV(headers, rows, filename) {
+  const csvContent=[headers].concat(rows).map(e=>e.map(cell=>{
+    if(cell===null||cell===undefined) return '';
+    const s=cell.toString();
+    if(s.indexOf('"')!==-1||s.indexOf(',')!==-1||s.indexOf('\n')!==-1){ return '"'+s.replace(/"/g,'""')+'"'; }
+    return s;
+  }).join(',')).join('\r\n');
+
+  const blob=new Blob([csvContent],{type:'text/csv;charset=utf-8;'});
+  const link=document.createElement('a');
+  link.href=URL.createObjectURL(blob);
+  link.download=filename;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// Init
+(function init(){ 
+  const today=new Date().toISOString().slice(0,10);
+  document.getElementById('fromDate').value=today;
+  document.getElementById('toDate').value=today;
+  document.getElementById('gFromDate').value=today;
+  document.getElementById('gToDate').value=today;
+  document.getElementById('vFromDate').value=today;
+  document.getElementById('vToDate').value=today;
+
+  applyPermissions();
+
+  // Only auto-fetch Amount report if user has permission
+  if (currentUser && currentUser.canAmount) {
+    fetchReport(today,today);
+  }
+})();
+
+function showTopLoader() {
+    document.getElementById('topLoader').style.transform = "scaleX(1)";
+}
+function hideTopLoader() {
+    setTimeout(() => {
+        document.getElementById('topLoader').style.transform = "scaleX(0)";
+    }, 300);
+}
+function refreshPage() {
+    location.reload();
+}
+</script>
+
+
+</body>
+</html>

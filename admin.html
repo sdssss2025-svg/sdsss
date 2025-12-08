@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+
+<title>Admin – User Management</title>
+<style>
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    background-image: url('lordayyappan.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow-x: hidden;
+}
+.wrap {
+    width: 100%;
+    max-width: 720px;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow-x: auto;
+}
+.card {
+    background: rgba(255,255,255,0.25);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 10px;
+    padding: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    margin-top: 12px;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+.header {
+    background: rgba(210, 180, 140, 0.8);
+    padding: 18px;
+    text-align: center;
+    color: #4b2e15;
+    font-weight: 700;
+    border-bottom: 3px solid #b88a57;
+    border-radius: 8px;
+}
+label { font-weight:600; font-size:14px; display:block; margin-top:10px; margin-bottom:4px; }
+input[type="text"], input[type="password"] {
+    width:100%;
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #cfcfcf;
+    font-size:14px;
+    box-sizing:border-box;
+}
+.perm-group {
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    margin-top:8px;
+}
+.perm-item {
+    display:flex;
+    align-items:center;
+    gap:4px;
+    font-size:13px;
+    background: rgba(255,255,255,0.5);
+    padding:4px 6px;
+    border-radius:6px;
+}
+.btn {
+    padding:10px 14px;
+    border-radius:8px;
+    border:none;
+    background:#0066cc;
+    color:#fff;
+    font-weight:700;
+    font-size:14px;
+    cursor:pointer;
+    margin-top:12px;
+}
+.btn.secondary {
+    background:#6c757d;
+}
+.btn.danger {
+    background:#dc3545;
+}
+.info {
+    font-size:13px;
+    margin-top:6px;
+}
+.table-wrap {
+    margin-top:12px;
+    overflow-x:auto;
+}
+table {
+    border-collapse:collapse;
+    width:max-content;
+    min-width:100%;
+    font-size:13px;
+    background: rgba(255,255,255,0.7);
+}
+th, td {
+    border:1px solid #eee;
+    padding:6px;
+    text-align:left;
+}
+th {
+    background: rgba(250,250,250,0.9);
+}
+.badge {
+    padding:2px 6px;
+    border-radius:10px;
+    font-size:11px;
+}
+.badge.yes { background:#28a745; color:#fff; }
+.badge.no  { background:#dc3545; color:#fff; }
+.top-links {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-top:8px;
+    font-size:13px;
+}
+a {
+    color:#004b9a;
+    text-decoration:none;
+}
+a:hover {
+    text-decoration:underline;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+    <div class="header">Admin – User Management</div>
+
+    <div class="card">
+        <div class="top-links">
+            <div id="adminUserInfo"></div>
+            <div>
+                <a href="new_dashboard.html">← Back to Dashboard</a>
+            </div>
+        </div>
+
+        <h3 style="margin:8px 0;">Create / Edit User</h3>
+
+        <label for="uName">Username</label>
+        <input id="uName" type="text" placeholder="Unique username">
+
+        <label for="uPass">Password</label>
+        <input id="uPass" type="password" placeholder="Set password">
+
+        <label>Mode Access</label>
+        <div class="perm-group">
+            <label class="perm-item"><input type="checkbox" id="pAmount"> Amount</label>
+            <label class="perm-item"><input type="checkbox" id="pGrocery"> Groceries</label>
+            <label class="perm-item"><input type="checkbox" id="pVilaku"> Vilaku</label>
+        </div>
+
+        <label>Actions</label>
+        <div class="perm-group">
+            <label class="perm-item"><input type="checkbox" id="pSubmit" checked> Submit</label>
+            <label class="perm-item"><input type="checkbox" id="pUpdate" checked> Update</label>
+            <label class="perm-item"><input type="checkbox" id="pReset" checked> Reset</label>
+            <label class="perm-item"><input type="checkbox" id="pDownload" checked> Download</label>
+        </div>
+
+        <label>Admin & Status</label>
+        <div class="perm-group">
+            <label class="perm-item"><input type="checkbox" id="pIsAdmin"> Is Admin</label>
+            <label class="perm-item"><input type="checkbox" id="pActive" checked> Active</label>
+        </div>
+
+        <button class="btn" id="saveUserBtn">Save User</button>
+        <button class="btn secondary" id="clearFormBtn">Clear Form</button>
+
+        <div class="info" id="adminStatus"></div>
+    </div>
+
+    <div class="card">
+        <h3 style="margin:8px 0;">Existing Users</h3>
+        <div class="info">Click a row to load it into the form for editing.</div>
+        <div class="table-wrap">
+            <table id="userTable">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Amount</th>
+                        <th>Groceries</th>
+                        <th>Vilaku</th>
+                        <th>Submit</th>
+                        <th>Update</th>
+                        <th>Reset</th>
+                        <th>Download</th>
+                        <th>Admin</th>
+                        <th>Active</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+const scriptURL = "https://script.google.com/macros/s/AKfycbyVkeYA_zkJqUy7REIkCtwvHCEWiRdYxk9WXqiNP557YFU0x2ySs-8fy6cfOLpy2o6ozw/exec";
+
+let currentAdminUser = null;
+let allUsers = [];
+
+// Elements
+const adminUserInfo = document.getElementById('adminUserInfo');
+const adminStatus = document.getElementById('adminStatus');
+const userTableBody = document.querySelector('#userTable tbody');
+
+const uName = document.getElementById('uName');
+const uPass = document.getElementById('uPass');
+const pAmount = document.getElementById('pAmount');
+const pGrocery = document.getElementById('pGrocery');
+const pVilaku = document.getElementById('pVilaku');
+const pSubmit = document.getElementById('pSubmit');
+const pUpdate = document.getElementById('pUpdate');
+const pReset = document.getElementById('pReset');
+const pDownload = document.getElementById('pDownload');
+const pIsAdmin = document.getElementById('pIsAdmin');
+const pActive = document.getElementById('pActive');
+const saveUserBtn = document.getElementById('saveUserBtn');
+const clearFormBtn = document.getElementById('clearFormBtn');
+
+function loadCurrentUser() {
+    try {
+        const raw = localStorage.getItem('ayyappaUser');
+        if (!raw) {
+            alert('Please login as admin first');
+            window.location.href = 'index1.html';
+            return;
+        }
+        currentAdminUser = JSON.parse(raw);
+        if (!currentAdminUser || !currentAdminUser.isAdmin) {
+            alert('You are not allowed to view Admin page.');
+            window.location.href = 'new_dashboard.html';
+            return;
+        }
+        adminUserInfo.textContent = 'Logged in as: ' + (currentAdminUser.username || '');
+    } catch (e) {
+        alert('Invalid session. Please login again.');
+        window.location.href = 'index1.html';
+    }
+}
+
+async function loadUsers() {
+    adminStatus.textContent = 'Loading users...';
+    try {
+        const res = await fetch(scriptURL + '?type=list-users');
+        const data = await res.json();
+        if (data.status !== 'ok') {
+            adminStatus.textContent = 'Error: ' + (data.message || 'Unable to load users');
+            return;
+        }
+        allUsers = data.users || [];
+        renderUserTable();
+        adminStatus.textContent = 'Loaded ' + allUsers.length + ' user(s).';
+    } catch (e) {
+        adminStatus.textContent = 'Error loading users.';
+        console.log(e);
+    }
+}
+
+function renderUserTable() {
+    userTableBody.innerHTML = '';
+    allUsers.forEach(u => {
+        const tr = document.createElement('tr');
+        tr.style.cursor = 'pointer';
+        tr.innerHTML = `
+            <td>${u.username || ''}</td>
+            <td>${badge(u.canAmount)}</td>
+            <td>${badge(u.canGroceries)}</td>
+            <td>${badge(u.canVilaku)}</td>
+            <td>${badge(u.canSubmit)}</td>
+            <td>${badge(u.canUpdate)}</td>
+            <td>${badge(u.canReset)}</td>
+            <td>${badge(u.canDownload)}</td>
+            <td>${badge(u.isAdmin)}</td>
+            <td>${badge(u.active)}</td>
+        `;
+        tr.addEventListener('click', () => fillFormFromUser(u));
+        userTableBody.appendChild(tr);
+    });
+}
+
+function badge(val) {
+    const yes = val === true || val === 'YES';
+    return `<span class="badge ${yes ? 'yes' : 'no'}">${yes ? 'YES' : 'NO'}</span>`;
+}
+
+function fillFormFromUser(u) {
+    uName.value = u.username || '';
+    uPass.value = ''; // don't expose existing password
+    pAmount.checked = !!u.canAmount;
+    pGrocery.checked = !!u.canGroceries;
+    pVilaku.checked = !!u.canVilaku;
+    pSubmit.checked = !!u.canSubmit;
+    pUpdate.checked = !!u.canUpdate;
+    pReset.checked = !!u.canReset;
+    pDownload.checked = !!u.canDownload;
+    pIsAdmin.checked = !!u.isAdmin;
+    pActive.checked = !!u.active;
+    adminStatus.textContent = 'Editing user: ' + (u.username || '');
+}
+
+function clearForm() {
+    uName.value = '';
+    uPass.value = '';
+    pAmount.checked = false;
+    pGrocery.checked = false;
+    pVilaku.checked = false;
+    pSubmit.checked = true;
+    pUpdate.checked = true;
+    pReset.checked = true;
+    pDownload.checked = true;
+    pIsAdmin.checked = false;
+    pActive.checked = true;
+    adminStatus.textContent = 'Form cleared.';
+}
+
+async function saveUser() {
+    const username = uName.value.trim();
+    const password = uPass.value.trim(); // if empty, keep existing password in script
+
+    if (!username) {
+        alert('Username is required');
+        return;
+    }
+
+    const payload = {
+        type: 'save-user',
+        username: username,
+        password: password, // may be empty (handled in script)
+        canAmount: pAmount.checked,
+        canGroceries: pGrocery.checked,
+        canVilaku: pVilaku.checked,
+        canSubmit: pSubmit.checked,
+        canUpdate: pUpdate.checked,
+        canReset: pReset.checked,
+        canDownload: pDownload.checked,
+        isAdmin: pIsAdmin.checked,
+        active: pActive.checked
+    };
+
+    adminStatus.textContent = 'Saving user...';
+    try {
+        const res = await fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+            adminStatus.textContent = 'User saved successfully.';
+            await loadUsers();
+        } else {
+            adminStatus.textContent = 'Error: ' + (data.message || 'Unable to save user');
+        }
+    } catch (e) {
+        adminStatus.textContent = 'Error saving user.';
+        console.log(e);
+    }
+}
+
+clearFormBtn.addEventListener('click', clearForm);
+saveUserBtn.addEventListener('click', saveUser);
+
+(function initAdmin(){
+    loadCurrentUser();
+    loadUsers();
+})();
+</script>
+
+</body>
+</html>

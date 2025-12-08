@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login – Ayyappa Seva</title>
+
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+    }
+
+    body {
+        background-image: url('ayyappa.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .login-box {
+        width: 350px;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        color: #5a3f2e;
+        background: rgba(255, 255, 255, 0.25);
+        box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+    }
+
+    h2 {
+        margin-bottom: 25px;
+        font-size: 24px;
+        font-weight: 600;
+    }
+
+    input {
+        width: 90%;
+        padding: 12px;
+        margin: 10px 0;
+        border-radius: 8px;
+        border: 1px solid #aaa;
+        font-size: 16px;
+    }
+
+    button {
+        width: 95%;
+        padding: 12px;
+        background: #5a3f2e;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 17px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background 0.3s;
+    }
+
+    button:hover {
+        background: #3e2b20;
+    }
+
+    .error {
+        margin-top: 10px;
+        color: red;
+        font-size: 14px;
+        min-height: 18px;
+    }
+
+    .info {
+        margin-top: 8px;
+        font-size: 13px;
+        color: #333;
+    }
+
+    @media (max-width: 400px) {
+        .login-box {
+            width: 90%;
+            padding: 20px;
+        }
+    }
+</style>
+
+<script>
+// SAME scriptURL used in dashboard and admin page
+const scriptURL = "https://script.google.com/macros/s/AKfycbyVkeYA_zkJqUy7REIkCtwvHCEWiRdYxk9WXqiNP557YFU0x2ySs-8fy6cfOLpy2o6ozw/exec";
+
+async function login() {
+    const u = document.getElementById("user").value.trim();
+    const p = document.getElementById("pass").value.trim();
+    const error = document.getElementById("errorMsg");
+
+    if (!u || !p) {
+        error.textContent = "Please enter username and password";
+        return;
+    }
+
+    error.textContent = "Checking...";
+
+    try {
+        const res = await fetch(scriptURL, {
+            method: "POST",
+            body: JSON.stringify({
+                type: "login",
+                username: u,
+                password: p
+            })
+        });
+
+        const data = await res.json();
+
+        if (data.status === "success") {
+            // Save user details & permissions
+            localStorage.setItem("ayyappaUser", JSON.stringify(data.user || {}));
+
+            // 🔥 Redirect based on admin or normal user
+            if (data.user && data.user.isAdmin) {
+                window.location.href = "admin.html";  // Admin goes to admin panel
+            } else {
+                window.location.href = "new_dashboard.html"; // Normal user goes to dashboard
+            }
+
+        } else {
+            error.textContent = data.message || "❌ Wrong username or password";
+        }
+
+    } catch (e) {
+        console.log(e);
+        error.textContent = "Network error. Try again.";
+    }
+}
+
+// Allow ENTER key to submit
+window.addEventListener("DOMContentLoaded", () => {
+    const userInput = document.getElementById("user");
+    const passInput = document.getElementById("pass");
+
+    function handleKey(e) {
+        if (e.key === "Enter") login();
+    }
+
+    userInput.addEventListener("keyup", handleKey);
+    passInput.addEventListener("keyup", handleKey);
+});
+</script>
+
+</head>
+<body>
+
+<div class="login-box">
+    <h2>ஸ்வாமியே சரணம் அய்யப்பா</h2>
+
+    <input type="text" id="user" placeholder="Username">
+    <input type="password" id="pass" placeholder="Password">
+
+    <button onclick="login()">Login</button>
+
+    <div id="errorMsg" class="error"></div>
+
+    
+</div>
+
+</body>
+</html>
