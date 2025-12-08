@@ -234,7 +234,7 @@ function loadCurrentUser() {
         const raw = localStorage.getItem('ayyappaUser');
         if (!raw) {
             alert('Please login as admin first');
-            window.location.href = 'index1.html';
+            window.location.href = 'index.html';
             return;
         }
         currentAdminUser = JSON.parse(raw);
@@ -246,7 +246,7 @@ function loadCurrentUser() {
         adminUserInfo.textContent = 'Logged in as: ' + (currentAdminUser.username || '');
     } catch (e) {
         alert('Invalid session. Please login again.');
-        window.location.href = 'index1.html';
+        window.location.href = 'index.html';
     }
 }
 
@@ -379,3 +379,4 @@ saveUserBtn.addEventListener('click', saveUser);
 
 </body>
 </html>
+
