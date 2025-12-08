@@ -605,7 +605,7 @@ let currentUser = null;
 function logout() {
      showPopupLoader();
     localStorage.removeItem("ayyappaUser");  // clear session
-    window.location.href = "index1.html";    // redirect to login page
+    window.location.href = "index.html";    // redirect to login page
 }
 function getUserFromStorage() {
   try {
@@ -622,7 +622,7 @@ function getUserFromStorage() {
   if (!currentUser) {
     alert('Please login first');
     // change to your login file if needed (e.g. "index.html")
-    window.location.href = 'index1.html';
+    window.location.href = 'index.html';
   }
 })();
 
@@ -1445,3 +1445,4 @@ function hidePopupLoader() {
 
 </body>
 </html>
+
