@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="ta">
 <head>
-<link rel="manifest" href="manifest.json">
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="manifest.json">   
 <title>Login – Ayyappa Seva</title>
 
 <style>
@@ -169,12 +170,15 @@ window.addEventListener("DOMContentLoaded", () => {
     
 </div>
 <script>
-if ("serviceWorker" in navigator) {
-  navigator.serviceWorker.register("sw.js");
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+        .catch(err => console.log("SW error:", err));
 }
 </script>
 
+
 </body>
 </html>
+
 
 
