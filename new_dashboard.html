@@ -174,7 +174,16 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
   <button onclick="connectPrinter()" class="btn printer-transparent">
     🔌 Connect Printer
 </button>
+<div style="margin-top:12px;">
+  <input id="wifiPrinterIP" 
+         type="text" 
+         placeholder="Enter WiFi Printer IP (example: 192.168.1.50)" 
+         style="padding:10px; width:240px; border-radius:8px; border:1px solid #ccc;">
 
+  <button onclick="connectWiFiPrinter()" class="btn printer-transparent">
+      🌐 Connect WiFi Printer
+  </button>
+</div>
   <div class="header center">ஸ்வாமியே சரணம் ஐயப்பா</div>
   <!-- CONNECT PRINTER BUTTON -->
  
@@ -1685,10 +1694,10 @@ Receiver: ${data.receiver}
 --------------------------------
 ஸ்வாமியே சரணம் அய்யப்பா
 </pre>
-`;
+`;fv
 
 
-    billPopup.style.display = "flex";
+    billBox.style.display = "flex";
 }
 
 function closeBillPopup() {
@@ -1846,7 +1855,7 @@ async function connectPrinter() {
     }
 }
 
-// Send ESC/POS Text to Printer
+// Send ESC/POS Text to Bluetooth Printer
 async function printToThermal(text) {
     if (!window.printerChar) {
         alert("Printer not connected!");
@@ -1855,6 +1864,56 @@ async function printToThermal(text) {
     const encoder = new TextEncoder();
     await window.printerChar.writeValue(encoder.encode(text));
 }
+
+
+
+// ---------------------- WIFI PRINTER SUPPORT ----------------------
+let wifiPrinterIP = null;
+
+// Store IP of WiFi Printer
+function connectWiFiPrinter() {
+    const ip = document.getElementById("wifiPrinterIP").value.trim();
+
+    if (!ip) {
+        alert("Enter printer IP address");
+        return;
+    }
+
+    const ipPattern = /^(?:\d{1,3}\.){3}\d{1,3}$/;
+    if (!ipPattern.test(ip)) {
+        alert("Invalid IP format");
+        return;
+    }
+
+    wifiPrinterIP = ip;
+    alert("WiFi Printer connected at IP: " + wifiPrinterIP);
+}
+
+// Send ESC/POS to WiFi Printer (Needs port 9100 print receiver)
+async function sendToWiFiPrinter(text) {
+
+    if (!wifiPrinterIP) {
+        alert("WiFi Printer not connected!");
+        return;
+    }
+
+    try {
+        const encoded = btoa(text); // ESC/POS → Base64
+
+        await fetch(`http://${wifiPrinterIP}:9100/print`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ data: encoded })
+        });
+
+        alert("Printed through WiFi printer!");
+    }
+    catch (err) {
+        alert("WiFi Print failed: " + err);
+    }
+}
+
+
 
 // ---------------------- 58mm FORMATTER (32 CHAR WIDTH) ----------------------
 function fmt58(text) {
@@ -1871,6 +1930,8 @@ function fmt58(text) {
     }
     return out;
 }
+
+
 
 // ---------------------- FINAL ESC/POS PRINT (UPDATED) ----------------------
 async function printBillESC(data) {
@@ -1904,9 +1965,14 @@ Receiver: ${data.receiver}
         "ஸ்வாமியே சரணம் அய்யப்பா\n\n" +
         "\x1D\x56\x00";                      // Cut
 
+    // Bluetooth printing
     await printToThermal(finalPrint);
+
+    // OPTIONAL WiFi print: uncomment if you want auto WiFi print also
+    // await sendToWiFiPrinter(finalPrint);
 }
 </script>
+
 
 
 </body>
