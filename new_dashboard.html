@@ -1238,7 +1238,7 @@ submitBtn.addEventListener('click', async () => {
               name,
               door,
               street,
-              value:`Paid Now:₹${extraPaid} (Total: ₹${totalPaid})`,
+              value:`PaidNow:₹${extraPaid}/(Total:₹${totalPaid})`,
               payment: paymentEl.value,
               pending: newBalance,
               receiver,
@@ -1705,7 +1705,7 @@ function printBill() {
             <title>Print Bill</title>
         </head>
         <body>
-            <h2 style="text-align:center;">""</h2>
+            
             ${content}
             <br><br>
         </body>
