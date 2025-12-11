@@ -51,6 +51,7 @@ html, body {
     font-weight: 700;
     border-bottom: 3px solid #b88a57;
     border-radius: 8px;
+    margin-top: 60px;   /* ADDED → pushes header down */
 }
 
 /* ---------- FORM ELEMENTS ---------- */
@@ -128,6 +129,29 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
     .controls { flex-direction:column; }
     .summary { flex-direction:column; }
 }
+.printer-transparent {
+    width: 200px;
+    background: rgba(255, 255, 255, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    color: #4b2e15;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-radius: 10px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.printer-transparent:hover {
+    background: rgba(255, 255, 255, 0.30);
+}
+#printerMenuWrapper {
+    margin-bottom: 35px;   /* adds space below printer section */
+}
+@media (max-width: 480px) {
+    #printerMenuWrapper {
+        margin-bottom: 25px !important;
+    }
+}
 </style>
 </head>
 
@@ -146,8 +170,14 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
     transition:0.3s ease;
 "></div>
 <div class="wrap">
+   <!-- CONNECT PRINTER BUTTON -->
+  <button onclick="connectPrinter()" class="btn printer-transparent">
+    🔌 Connect Printer
+</button>
 
   <div class="header center">ஸ்வாமியே சரணம் ஐயப்பா</div>
+  <!-- CONNECT PRINTER BUTTON -->
+ 
 
   <!-- Mode Selection Card -->
   <div class="card">
@@ -598,7 +628,7 @@ th { background: rgba(250,250,250,0.6); font-weight:700; }
 </div>
 
 <script>
-const scriptURL = "https://script.google.com/macros/s/AKfycbyVkeYA_zkJqUy7REIkCtwvHCEWiRdYxk9WXqiNP557YFU0x2ySs-8fy6cfOLpy2o6ozw/exec"; 
+const scriptURL = "https://script.google.com/macros/s/AKfycby7BwTaiyp_hIE2ZFXYKyUsg_WSR4MJUCN05VxNJeo9N1cpC1sypxLV_ikgT1t9VNtLWA/exec"; 
 
 // ---------- USER + PERMISSIONS FROM LOGIN ----------
 let currentUser = null;
@@ -666,6 +696,10 @@ let lastFetchedVilakuRows = [];
 
 // For update flow
 let currentUpdateType = null;
+let oldAmount = 0;
+let oldBalance = 0;
+let oldVilakuAmount = 0;
+let oldVilakuPending = 0;
 let currentAmountUpdateRow = null;
 let currentGroceryUpdateRow = null;
 let currentVilakuUpdateRow = null;
@@ -898,6 +932,8 @@ searchBtn.addEventListener('click', async ()=>{
 function selectSearchRecord(r){
   if(currentUpdateType === 'amount'){
     currentAmountUpdateRow = r.rowIndex;
+    oldAmount = Number(r.amount || 0);
+    oldBalance = Number(r.balance || 0);
     document.getElementById('name').value = r.name || '';
     document.getElementById('door').value = r.door || '';
     document.getElementById('street').value = r.street || '';
@@ -942,6 +978,9 @@ function selectSearchRecord(r){
     document.getElementById('gMobile').value = r.mobile || '';
   } else if(currentUpdateType === 'vilaku'){
     currentVilakuUpdateRow = r.rowIndex;
+    oldVilakuAmount = Number(r.amount || 0);
+    oldVilakuPending = (r.pending === "Yes" || r.pending === "YES") ? 1 : 0;
+
     document.getElementById('vName').value = r.name || '';
     document.getElementById('vDoor').value = r.door || '';
     document.getElementById('vStreet').value = r.street || '';
@@ -1104,77 +1143,167 @@ async function fetchVilakuReport(from, to, pending){
 }
 
 // --------- SUBMIT (INSERT / UPDATE) ---------
-submitBtn.addEventListener('click', async ()=>{
+submitBtn.addEventListener('click', async () => {
+
+  if (!currentUser || !currentUser.canSubmit) { 
+      alert('Not allowed to submit'); 
+      return; 
+  }
+
+  const name = document.getElementById('name').value.trim();
+  const door = document.getElementById('door').value.trim();
+  const street = document.getElementById('street').value;
+  const amount = document.getElementById('amount').value;
+  const balance = document.getElementById('balance').value;
+  const dateVal = document.getElementById('date').value;
+  const paymentEl = document.querySelector('input[name="payment"]:checked');
+  const receiver = document.getElementById('receiver').value;
+  const mobile = document.getElementById('mobile').value.trim();
+
+  // ❌ VALIDATION — NO LOADER BEFORE THIS
+  if (!name || !door || !amount) { 
+      alert('Fill Name, Door & Amount'); 
+      return; 
+  }
+
+  if (!paymentEl) { 
+      alert('Select Payment Type'); 
+      return; 
+  }
+
+  // ✅ Show loader ONLY after validation is passed
   showPopupLoader();
-  if (!currentUser || !currentUser.canSubmit) { alert('Not allowed to submit'); return; }
-
-  const name=document.getElementById('name').value.trim();
-  const door=document.getElementById('door').value.trim();
-  const street=document.getElementById('street').value;
-  const amount=document.getElementById('amount').value;
-  const balance=document.getElementById('balance').value;
-  const dateVal=document.getElementById('date').value;
-  const paymentEl=document.querySelector('input[name="payment"]:checked');
-  const receiver=document.getElementById('receiver').value;
-  const mobile=document.getElementById('mobile').value.trim();
-
-  if(!name||!door||!amount){ alert('Fill Name, Door & Amount'); return; }
-  if(!paymentEl){ alert('Select Payment Type'); return; }
 
   let payloadType = 'amount';
-  if(currentAmountUpdateRow){ payloadType = 'update-amount'; }
+  if (currentAmountUpdateRow) { payloadType = 'update-amount'; }
 
-  const payload={type:payloadType, rowIndex: currentAmountUpdateRow, name,door,street,amount:Number(amount),balance:Number(balance||0),payment:paymentEl.value,receiver,mobile};
-  if(dateVal) payload.date=dateVal;
+  const payload = {
+      type: payloadType,
+      rowIndex: currentAmountUpdateRow,
+      name, door, street,
+      amount: Number(amount),
+      balance: Number(balance || 0),
+      payment: paymentEl.value,
+      receiver,
+      mobile
+  };
 
-  try{
-    setLoading(submitBtn, statusMsg, true,'Saving...');
-    const res=await fetch(scriptURL,{method:'POST',body:JSON.stringify(payload)});
-    const data=await res.json();
-    if(data.status==='duplicate'){ alert('Duplicate record'); }
-    else if(data.status==='success'){
-      alert('Saved successfully');
-      currentAmountUpdateRow = null;
-      document.getElementById('name').value='';
-      document.getElementById('door').value='';
-      document.getElementById('amount').value='';
-      document.getElementById('balance').value='';
-      document.getElementById('date').value='';
-      document.getElementById('mobile').value='';
-      document.querySelectorAll('input[name="payment"]').forEach(i=>i.checked=false);
-      const from=document.getElementById('fromDate').value;
-      const to=document.getElementById('toDate').value;
-      if(from&&to) fetchReport(from,to);
-    } else if(data.status==='updated'){
-      alert('Updated successfully');
-      currentAmountUpdateRow = null;
-      const from=document.getElementById('fromDate').value;
-      const to=document.getElementById('toDate').value;
-      if(from&&to) fetchReport(from,to);
-    } else { alert('Error: '+(data.message||'Unknown')); }
-  } catch(err){ alert('Network error.\n'+err); }
-  finally{
-     hidePopupLoader();
-    setLoading(submitBtn, statusMsg, false); }
+  if (dateVal) payload.date = dateVal;
+
+  try {
+      setLoading(submitBtn, statusMsg, true, 'Saving...');
+      const res = await fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.status === 'duplicate') {
+          alert('Duplicate record');
+      }
+
+      // ---------------- SAVE SUCCESS ----------------
+      else if (data.status === 'success') {
+          
+          if (confirm("Saved successfully!\nDo you want to print the bill?")) {
+              showBill({
+                  type: "Amount",
+                  name,
+                  door,
+                  street,
+                  value: amount,
+                  payment: paymentEl.value,
+                  pending: balance,
+                  receiver,
+                  mobile,
+                  date: dateVal || new Date().toISOString().slice(0,10)
+              });
+          }
+
+          clearAmountForm();
+      }
+
+      // ---------------- UPDATE SUCCESS ----------------
+      else if (data.status === 'updated') {
+
+          const oldAmount = Number(data.oldAmount || 0);
+          const newAmount = Number(amount);
+          const newBalance = Number(balance || 0);
+
+          const extraPaid = newAmount - oldAmount;
+          const totalPaid = oldAmount + extraPaid;
+
+          showBill({
+              type: "Amount (Updated)",
+              name,
+              door,
+              street,
+              value:`Paid Now:₹${extraPaid} (Total: ₹${totalPaid})`,
+              payment: paymentEl.value,
+              pending: newBalance,
+              receiver,
+              mobile,
+              date: dateVal || new Date().toISOString().slice(0,10)
+          });
+
+          clearAmountForm();
+          currentAmountUpdateRow = null;
+      }
+
+      else {
+          alert('Error: ' + (data.message || 'Unknown'));
+      }
+
+  } catch(err) {
+      alert('Network error.\n' + err);
+  }
+  finally {
+      hidePopupLoader();
+      setLoading(submitBtn, statusMsg, false);
+  }
 });
 
-submitGroceryBtn.addEventListener('click', async ()=>{
-  showPopupLoader();
-  if (!currentUser || !currentUser.canSubmit) { alert('Not allowed to submit'); return; }
 
-  const name=document.getElementById('gName').value.trim();
-  const door=document.getElementById('gDoor').value.trim();
-  const street=document.getElementById('gStreet').value;
-  let item=document.getElementById('gItem').value;
-  const qty=document.getElementById('gQty').value;
-  const unit=document.getElementById('gUnit').value;
-  const pending=document.getElementById('gPending').value;
-  const receiver=document.getElementById('gReceiver').value;
-  const dateVal=document.getElementById('gDate').value;
-  const mobile=document.getElementById('gMobile').value.trim();
 
-  if(!name||!door||!qty){ alert('Fill Name, Door & Quantity'); return; }
+// ----------- HELPER: CLEAR FORM -----------
+function clearAmountForm() {
+    currentAmountUpdateRow = null;
+    document.getElementById('name').value='';
+    document.getElementById('door').value='';
+    document.getElementById('amount').value='';
+    document.getElementById('balance').value='';
+    document.getElementById('date').value='';
+    document.getElementById('mobile').value='';
+    document.querySelectorAll('input[name="payment"]').forEach(i=>i.checked=false);
+}
 
+
+submitGroceryBtn.addEventListener('click', async ()=> {
+
+  if (!currentUser || !currentUser.canSubmit) { 
+    alert('Not allowed to submit'); 
+    return; 
+  }
+
+  const name = document.getElementById('gName').value.trim();
+  const door = document.getElementById('gDoor').value.trim();
+  const street = document.getElementById('gStreet').value;
+
+  let item = document.getElementById('gItem').value;
+  const qty = document.getElementById('gQty').value;
+  const unit = document.getElementById('gUnit').value;
+  const pending = document.getElementById('gPending').value;
+  const receiver = document.getElementById('gReceiver').value;
+  const dateVal = document.getElementById('gDate').value;
+  const mobile = document.getElementById('gMobile').value.trim();
+
+  // ❌ VALIDATION FIRST (no loader)
+  if (!name || !door || !qty) { 
+    alert('Fill Name, Door & Quantity'); 
+    return; 
+  }
+
+  // Handle "Others"
   if (item === 'Others') {
     const otherVal = gItemOtherInput ? gItemOtherInput.value.trim() : '';
     if (!otherVal) {
@@ -1184,101 +1313,231 @@ submitGroceryBtn.addEventListener('click', async ()=>{
     item = otherVal;
   }
 
+  // ✅ Loader AFTER validation
+  showPopupLoader();
+
   let payloadType = 'grocery';
-  if(currentGroceryUpdateRow){ payloadType = 'update-grocery'; }
+  if (currentGroceryUpdateRow) { payloadType = 'update-grocery'; }
 
-  const payload={type:payloadType,rowIndex: currentGroceryUpdateRow,name,door,street,item,qty:Number(qty),unit,pending,receiver,mobile};
-  if(dateVal) payload.date=dateVal;
+  const payload = {
+    type: payloadType,
+    rowIndex: currentGroceryUpdateRow,
+    name, door, street, item,
+    qty: Number(qty),
+    unit, pending, receiver, mobile
+  };
+  if (dateVal) payload.date = dateVal;
 
-  try{
-    setLoading(submitGroceryBtn, gStatusMsg, true,'Saving...');
-    const res=await fetch(scriptURL,{method:'POST',body:JSON.stringify(payload)});
-    const data=await res.json();
-    if(data.status==='duplicate'){ alert('Duplicate record'); }
-    else if(data.status==='success'){
-      alert('Saved successfully');
-      currentGroceryUpdateRow = null;
-      document.getElementById('gName').value='';
-      document.getElementById('gDoor').value='';
-      document.getElementById('gQty').value='';
-      document.getElementById('gDate').value='';
-      document.getElementById('gMobile').value='';
-      if (gItemSelect && gItemOtherInput) {
-        gItemSelect.value = 'Rice';
-        gItemOtherInput.classList.add('hidden');
-        gItemOtherInput.value = '';
+  try {
+    setLoading(submitGroceryBtn, gStatusMsg, true, 'Saving...');
+    const res = await fetch(scriptURL, { 
+      method:'POST', 
+      body: JSON.stringify(payload) 
+    });
+
+    const data = await res.json();
+
+    if (data.status === 'duplicate') { 
+      alert('Duplicate record'); 
+    }
+
+    // ---------------- SAVE SUCCESS ----------------
+    else if (data.status === 'success') {
+
+      if (confirm("Saved successfully!\nDo you want to print the bill?")) {
+        showBill({
+          type: "Groceries",
+          name,
+          door,
+          street,
+          value: `${qty} ${unit} (${item})`,
+          payment: "-",
+          pending,
+          receiver,
+          mobile,
+          date: dateVal || new Date().toISOString().slice(0,10)
+        });
       }
-      const from=document.getElementById('gFromDate').value;
-      const to=document.getElementById('gToDate').value;
-      const pendingFilter=document.getElementById('gFilterPending').value;
-      if(from&&to) fetchGroceryReport(from,to,pendingFilter);
-    } else if(data.status==='updated'){
-      alert('Updated successfully');
+
+      clearGroceryForm();
+    }
+
+    // ---------------- UPDATE SUCCESS ----------------
+    else if (data.status === 'updated') {
+
+      showBill({
+        type: "Groceries (Updated)",
+        name,
+        door,
+        street,
+        value: `${qty} ${unit} (${item})`, 
+        payment: "-",
+        pending: pending,
+        receiver,
+        mobile,
+        date: dateVal || new Date().toISOString().slice(0,10)
+      });
+
+      clearGroceryForm();
       currentGroceryUpdateRow = null;
-      const from=document.getElementById('gFromDate').value;
-      const to=document.getElementById('gToDate').value;
-      const pendingFilter=document.getElementById('gFilterPending').value;
-      if(from&&to) fetchGroceryReport(from,to,pendingFilter);
-    } else { alert('Error: '+(data.message||'Unknown')); }
-  } catch(err){ alert('Network error.\n'+err); }
-  finally{
-     hidePopupLoader();
-     setLoading(submitGroceryBtn, gStatusMsg, false); }
+    }
+
+    else { 
+      alert('Error: ' + (data.message || 'Unknown')); 
+    }
+
+  } catch (err) { 
+    alert('Network error.\n' + err); 
+  }
+  finally { 
+    hidePopupLoader();
+    setLoading(submitGroceryBtn, gStatusMsg, false); 
+  }
 });
+
+
+
 
 submitVilakuBtn.addEventListener('click', async ()=>{
+
+  // ❌ VALIDATION FIRST — before loader
+  if (!currentUser || !currentUser.canSubmit) { 
+    alert('Not allowed to submit'); 
+    return; 
+  }
+
+  const name = document.getElementById('vName').value.trim();
+  const door = document.getElementById('vDoor').value.trim();
+  const street = document.getElementById('vStreet').value;
+  const amount = document.getElementById('vAmount').value;
+  const paymentEl = document.querySelector('input[name="vPayment"]:checked');
+  const pending = document.getElementById('vPending').value;
+  const receiver = document.getElementById('vReceiver').value;
+  const dateVal = document.getElementById('vDate').value;
+  const mobile = document.getElementById('vMobile').value.trim();
+
+  if (!name || !door) { 
+    alert('Fill Name & Door'); 
+    return; 
+  }
+
+  if (!paymentEl) { 
+    alert('Select Payment Type'); 
+    return; 
+  }
+
+  // ✅ show loader only AFTER validation
   showPopupLoader();
-  if (!currentUser || !currentUser.canSubmit) { alert('Not allowed to submit'); return; }
-
-  const name=document.getElementById('vName').value.trim();
-  const door=document.getElementById('vDoor').value.trim();
-  const street=document.getElementById('vStreet').value;
-  const amount=document.getElementById('vAmount').value;
-  const paymentEl=document.querySelector('input[name="vPayment"]:checked');
-  const pending=document.getElementById('vPending').value;
-  const receiver=document.getElementById('vReceiver').value;
-  const dateVal=document.getElementById('vDate').value;
-  const mobile=document.getElementById('vMobile').value.trim();
-
-  if(!name||!door){ alert('Fill Name & Door'); return; }
-  if(!paymentEl){ alert('Select Payment Type'); return; }
 
   let payloadType = 'vilaku';
-  if(currentVilakuUpdateRow){ payloadType = 'update-vilaku'; }
+  if (currentVilakuUpdateRow) payloadType = 'update-vilaku';
 
-  const payload={type:payloadType,rowIndex: currentVilakuUpdateRow,name,door,street,amount:Number(amount),payment:paymentEl.value,pending,receiver,mobile};
-  if(dateVal) payload.date=dateVal;
+  const payload = {
+    type: payloadType,
+    rowIndex: currentVilakuUpdateRow,
+    name, door, street,
+    amount: Number(amount),
+    payment: paymentEl.value,
+    pending,
+    receiver,
+    mobile
+  };
+  if (dateVal) payload.date = dateVal;
 
-  try{
-    setLoading(submitVilakuBtn, vStatusMsg, true,'Saving...');
-    const res=await fetch(scriptURL,{method:'POST',body:JSON.stringify(payload)});
-    const data=await res.json();
-    if(data.status==='duplicate'){ alert('Duplicate record'); }
-    else if(data.status==='success'){
-      alert('Saved successfully');
+  try {
+
+    setLoading(submitVilakuBtn, vStatusMsg, true, 'Saving...');
+    const res = await fetch(scriptURL, {
+      method:'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    if (data.status === 'duplicate') {
+      alert('Duplicate record');
+    }
+
+    // --------------------- UPDATE SUCCESS ---------------------
+    else if (data.status === 'updated') {
+
+      hidePopupLoader();
+
+      const updatedAmount = Number(amount);
+      const updatedPending = pending;
+
+      if (confirm("Updated successfully!\nDo you want to print the updated bill?")) {
+        showBill({
+          type: "Vilaku (Updated)",
+          name,
+          door,
+          street,
+          value: "₹" + updatedAmount,   // ONLY NEW VALUE — NO ADDING
+          payment: paymentEl.value,
+          pending: updatedPending,
+          receiver,
+          mobile,
+          date: dateVal || new Date().toISOString().slice(0,10)
+        });
+      }
+
       currentVilakuUpdateRow = null;
-      document.getElementById('vName').value='';
-      document.getElementById('vDoor').value='';
-      document.getElementById('vDate').value='';
-      document.getElementById('vMobile').value='';
-      document.querySelectorAll('input[name="vPayment"]').forEach(i=>i.checked=false);
-      const from=document.getElementById('vFromDate').value;
-      const to=document.getElementById('vToDate').value;
-      const pendingFilter=document.getElementById('vFilterPending').value;
-      if(from&&to) fetchVilakuReport(from,to,pendingFilter);
-    } else if(data.status==='updated'){
-      alert('Updated successfully');
+
+      // Clear form fields
+      document.getElementById('vName').value = '';
+      document.getElementById('vDoor').value = '';
+      document.getElementById('vDate').value = '';
+      document.getElementById('vMobile').value = '';
+      document.querySelectorAll('input[name="vPayment"]').forEach(i => i.checked = false);
+
+      return;
+    }
+
+    // --------------------- SAVE SUCCESS ---------------------
+    else if (data.status === 'success') {
+
+      hidePopupLoader();
+
+      if (confirm("Saved successfully!\nDo you want to print the bill?")) {
+        showBill({
+          type: "Vilaku",
+          name,
+          door,
+          street,
+          value: "₹" + amount,
+          payment: paymentEl.value,
+          pending,
+          receiver,
+          mobile,
+          date: dateVal || new Date().toISOString().slice(0,10)
+        });
+      }
+
       currentVilakuUpdateRow = null;
-      const from=document.getElementById('vFromDate').value;
-      const to=document.getElementById('vToDate').value;
-      const pendingFilter=document.getElementById('vFilterPending').value;
-      if(from&&to) fetchVilakuReport(from,to,pendingFilter);
-    } else { alert('Error: '+(data.message||'Unknown')); }
-  } catch(err){ alert('Network error.\n'+err); }
-  finally{ 
-    hidePopupLoader();
-    setLoading(submitVilakuBtn, vStatusMsg, false); }
+
+      // Clear form fields
+      document.getElementById('vName').value = '';
+      document.getElementById('vDoor').value = '';
+      document.getElementById('vDate').value = '';
+      document.getElementById('vMobile').value = '';
+      document.querySelectorAll('input[name="vPayment"]').forEach(i => i.checked = false);
+
+      return;
+    }
+
+    else {
+      alert('Error: ' + (data.message || 'Unknown'));
+    }
+
+  } catch(err) {
+    alert('Network error.\n' + err);
+  }
+  finally { 
+    setLoading(submitVilakuBtn, vStatusMsg, false); 
+  }
 });
+
+
 
 // Filter buttons
 filterBtn.addEventListener('click',()=>{ 
@@ -1403,6 +1662,72 @@ function showPopupLoader() {
 function hidePopupLoader() {
     document.getElementById("popupLoader").style.display = "none";
 }
+// ---------------- BILL POPUP FUNCTIONS ----------------
+function showBill(data) {
+    const billBox = document.getElementById("billPopup");
+    const billContent = document.getElementById("billContent");
+
+    billContent.innerHTML = `
+<pre style="font-family: monospace; font-size: 14px; white-space: pre;">
+ஸ்ரீ தர்ம சாஸ்தா சபரி சேவா சங்கம்
+--------------------------------
+Customer Name: ${data.name}
+Door No: ${data.door}
+Street: ${data.street}
+Mobile: ${data.mobile}
+Date: ${data.date}
+
+Transaction Type: ${data.type}
+Amount / Qty: ${data.value}
+Payment Type: ${data.payment}
+Pending: ${data.pending}
+Receiver: ${data.receiver}
+--------------------------------
+ஸ்வாமியே சரணம் அய்யப்பா
+</pre>
+`;
+
+
+    billPopup.style.display = "flex";
+}
+
+function closeBillPopup() {
+    document.getElementById("billPopup").style.display = "none";
+}
+
+function printBill() {
+    const content = document.getElementById("billContent").innerHTML;
+
+    const win = window.open("", "", "width=400,height=600");
+    win.document.write(`
+        <html>
+        <head>
+            <title>Print Bill</title>
+        </head>
+        <body>
+            <h2 style="text-align:center;">""</h2>
+            ${content}
+            <br><br>
+        </body>
+        </html>
+    `);
+    win.document.close();
+    win.print();
+}
+function clearGroceryForm(){
+    currentGroceryUpdateRow = null;
+    document.getElementById('gName').value='';
+    document.getElementById('gDoor').value='';
+    document.getElementById('gQty').value='';
+    document.getElementById('gDate').value='';
+    document.getElementById('gMobile').value='';
+
+    if (gItemSelect && gItemOtherInput) {
+      gItemSelect.value = 'Rice';
+      gItemOtherInput.classList.add('hidden');
+      gItemOtherInput.value = '';
+    }
+}
 
 </script>
 
@@ -1450,6 +1775,139 @@ function hidePopupLoader() {
   to { transform: rotate(360deg); }
 }
 </style>
+<!-- BILL POPUP -->
+<div id="billPopup" style="
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.4);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+">
+    <div style="
+        background: white;
+        padding: 20px;
+        width: 320px;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        font-size: 15px;
+        line-height: 1.4;
+    ">
+        
+
+        <div id="billContent"></div>
+
+        <div style="margin-top: 15px; text-align: center;">
+            <button onclick="printBill()" style="
+                padding: 10px 16px;
+                background: #0066cc;
+                color:white;
+                border:none;
+                border-radius:8px;
+                font-size:15px;
+                cursor:pointer;
+            ">Print</button>
+
+            <button onclick="closeBillPopup()" style="
+                padding: 10px 16px;
+                background: #888;
+                color:white;
+                border:none;
+                border-radius:8px;
+                font-size:15px;
+                cursor:pointer;
+                margin-left:10px;
+            ">Close</button>
+        </div>
+    </div>
+</div>
+<script>
+// ---------------------- BLUETOOTH PRINT SUPPORT ----------------------
+let printerDevice = null;
+
+// Connect to Bluetooth Printer
+async function connectPrinter() {
+    try {
+        printerDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: [0x18F0, 0x18F1]
+        });
+
+        const server = await printerDevice.gatt.connect();
+        window.printerService = await server.getPrimaryService(0x18F0);
+        window.printerChar = await printerService.getCharacteristic(0x2AF1);
+
+        alert("Printer connected successfully!");
+    } 
+    catch (err) {
+        alert("Printer connection failed: " + err);
+    }
+}
+
+// Send ESC/POS Text to Printer
+async function printToThermal(text) {
+    if (!window.printerChar) {
+        alert("Printer not connected!");
+        return;
+    }
+    const encoder = new TextEncoder();
+    await window.printerChar.writeValue(encoder.encode(text));
+}
+
+// ---------------------- 58mm FORMATTER (32 CHAR WIDTH) ----------------------
+function fmt58(text) {
+    const max = 32;
+    let out = "";
+    const lines = text.split("\n");
+
+    for (let line of lines) {
+        while (line.length > max) {
+            out += line.substring(0, max) + "\n";
+            line = line.substring(max);
+        }
+        out += line + "\n";
+    }
+    return out;
+}
+
+// ---------------------- FINAL ESC/POS PRINT (UPDATED) ----------------------
+async function printBillESC(data) {
+
+    // BUILD FULL BILL TEXT
+    let billText = `
+Customer Name: ${data.name}
+Door No: ${data.door}
+Street: ${data.street}
+Mobile: ${data.mobile}
+Date: ${data.date}
+
+Transaction Type: ${data.type}
+Amount / Qty: ${data.value}
+Payment Type: ${data.payment}
+Pending: ${data.pending}
+Receiver: ${data.receiver}
+`;
+
+    const formatted = fmt58(billText);
+
+    const finalPrint =
+        "\x1B\x40" +                         // Initialize
+        "\x1B\x61\x01" +                     // Center
+        "ஸ்ரீ தர்ம சாஸ்தா சபரி சேவா சங்கம்\n" +
+        "--------------------------------\n" +
+        "\x1B\x61\x00" +                     // Left
+        formatted +
+        "--------------------------------\n" +
+        "\x1B\x61\x01" +
+        "ஸ்வாமியே சரணம் அய்யப்பா\n\n" +
+        "\x1D\x56\x00";                      // Cut
+
+    await printToThermal(finalPrint);
+}
+</script>
+
 
 </body>
 </html>
